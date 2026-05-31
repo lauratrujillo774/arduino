@@ -1,0 +1,2816 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HidroTec - Panel Docente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/frontend/docente/principal.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100">
+    <!-- Navigation Bar -->
+    <nav class="bg-zinc-200 text-black shadow-lg fixed top-0 w-full z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <img src="../img/HIDROTEC (1).png" alt="HidroTec" height="50px" width="55px">
+                <span class="text-xl font-bold">HidroTec</span>
+            </div>
+
+            <div class="hidden md:flex space-x-6">
+                <a href="principal.html" class="nav-item">Dashboard</a>
+                <a href="/frontend/informativo.html" class="nav-item">Guía cultivo</a>
+                <a href="/frontend/docente/estudiantes.html" class="nav-item">Estudiantes</a>
+                <a href="configuracion.html" class="nav-item">Configuración</a>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <i class="fas fa-bell text-xl cursor-pointer hover:text-blue-600 transition-colors"></i>
+                    <span
+                        class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">3</span>
+                </div>
+                <div class="flex items-center space-x-2 cursor-pointer hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors"
+                    id="config-btn">
+                    <img src="https://ui-avatars.com/api/?name=Docente&background=4ade80&color=fff" alt="User"
+                        class="w-8 h-8 rounded-full">
+                    <span class="hidden md:inline" id="user-name">Docente</span>
+                </div>
+                <button onclick="logout()"
+                    class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Salir
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Modal para Editar Perfil -->
+    <div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Editar Perfil</h3>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="profile-form" class="space-y-4">
+                <div>
+                    <label for="profile-name" class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                    <input type="text" id="profile-name"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="profile-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="profile-email"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex space-x-3">
+                    <button type="submit"
+                        class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors">
+                        Guardar
+                    </button>
+                    <button type="button" id="cancel-edit"
+                        class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-lg transition-colors">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 mt-20">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">Bienvenido, Docente</h1>
+
+        <!-- Status Cards -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Modo Automático Card -->
+            <div class="card bg-white rounded-xl p-6 shadow-md border-l-4 border-purple-700">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-gray-500 font-semibold">Modo Automático</h3>
+                        <p class="text-lg font-bold text-purple-800 mt-2" id="auto-mode-text">Desactivado</p>
+                        <p class="text-sm mt-1"><span id="auto-mode-status"
+                                class="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Sistema
+                                Manual</span></p>
+                    </div>
+                    <i class="fas fa-robot text-3xl text-purple-400"></i>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm text-gray-600">Estado del Sistema</span>
+                        <div class="relative inline-block">
+                            <input type="checkbox" id="global-auto-toggle" class="sr-only"
+                                onchange="toggleGlobalAutoMode()">
+                            <label for="global-auto-toggle" class="flex items-center cursor-pointer">
+                                <div id="global-auto-switch"
+                                    class="relative w-12 h-6 bg-gray-400 rounded-full shadow-inner transition-colors duration-300">
+                                    <div id="global-auto-circle"
+                                        class="absolute w-5 h-5 bg-white rounded-full shadow-md top-0.5 left-0.5 transition-transform duration-300">
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                        <div id="auto-mode-bar" class="bg-purple-400 h-2.5 rounded-full transition-all duration-500"
+                            style="width: 0%"></div>
+                    </div>
+                </div>
+                <button onclick="toggleGlobalAutoMode()"
+                    class="w-full mt-4 bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded-lg transition-colors">
+                    <i class="fas fa-power-off mr-2"></i><span id="auto-button-text">Activar Automático</span>
+                </button>
+            </div>
+
+            <!-- pH Agua Card -->
+            <div class="card bg-white rounded-xl p-6 shadow-md border-l-4 border-blue-700">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-gray-500 font-semibold">Nivel de pH del agua</h3>
+                        <p class="text-3xl font-bold text-blue-800 mt-2"><span id="ph-agua-value">--</span></p>
+                        <p class="text-sm mt-1"><span id="ph-agua-status"
+                                class="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Cargando...</span>
+                        </p>
+                    </div>
+                    <i class="fas fa-water text-3xl text-blue-400"></i>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <div class="flex justify-between text-sm text-gray-500">
+                        <span>Ácido: &lt;5.5</span>
+                        <span>Neutro: 5.5-7.5</span>
+                        <span>Alcalino: &gt;7.5</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                        <div id="ph-agua-bar" class="bg-blue-400 h-2.5 rounded-full transition-all duration-500"
+                            style="width: 0%"></div>
+                    </div>
+                </div>
+                <button onclick="openManualControl('ph-agua')"
+                    class="w-full mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors"
+                    id="ph-agua-btn">
+                    <i class="fas fa-cogs mr-2"></i>Control Manual
+                </button>
+            </div>
+
+            <!-- TDS Card -->
+            <div class="card bg-white rounded-xl p-6 shadow-md border-l-4 border-green-700">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-gray-500 font-semibold">TDS (ppm)</h3>
+                        <p class="text-3xl font-bold text-green-800 mt-2"><span id="tds-value">--</span></p>
+                        <p class="text-sm mt-1"><span id="tds-status"
+                                class="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Cargando...</span>
+                        </p>
+                    </div>
+                    <i class="fas fa-bolt text-3xl text-green-400"></i>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <div class="flex justify-between text-sm text-gray-500">
+                        <span>Óptimo: &lt;500</span>
+                        <span>Aceptable: 500-1000</span>
+                        <span>Problema: &gt;1000</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                        <div id="tds-bar" class="bg-green-400 h-2.5 rounded-full transition-all duration-500"
+                            style="width: 0%"></div>
+                    </div>
+                </div>
+                <button onclick="openManualControl('tds')"
+                    class="w-full mt-4 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors"
+                    id="tds-btn">
+                    <i class="fas fa-cogs mr-2"></i>Control Manual
+                </button>
+            </div>
+
+            <!-- Temperature Card -->
+            <div class="card bg-white rounded-xl p-6 shadow-md border-l-4 border-orange-700">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-gray-500 font-semibold">Temperatura</h3>
+                        <p class="text-3xl font-bold text-orange-800 mt-2"><span id="temp-value">--</span>°C</p>
+                        <p class="text-sm mt-1"><span id="temp-status"
+                                class="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Cargando...</span>
+                        </p>
+                    </div>
+                    <i class="fas fa-thermometer-half text-3xl text-orange-400"></i>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <div class="flex justify-between text-sm text-gray-500">
+                        <span>Baja: &lt;15°C</span>
+                        <span>Óptima: 20-28°C</span>
+                        <span>Alta: &gt;30°C</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                        <div id="temp-bar" class="bg-orange-400 h-2.5 rounded-full transition-all duration-500"
+                            style="width: 0%"></div>
+                    </div>
+                </div>
+                <button onclick="openManualControl('temperatura')"
+                    class="w-full mt-4 bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-lg transition-colors"
+                    id="temperatura-btn">
+                    <i class="fas fa-cogs mr-2"></i>Control Manual
+                </button>
+            </div>
+
+            <!-- pH Suelo Card -->
+            <div class="card bg-white rounded-xl p-6 shadow-md border-l-4 border-amber-700">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-gray-500 font-semibold">Nivel pH del suelo</h3>
+                        <p class="text-3xl font-bold text-amber-800 mt-2"><span id="ph-suelo-value">--</span></p>
+                        <p class="text-sm mt-1"><span id="ph-suelo-status"
+                                class="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Cargando...</span>
+                        </p>
+                    </div>
+                    <i class="fas fa-mountain text-3xl text-amber-400"></i>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <div class="flex justify-between text-sm text-gray-500">
+                        <span>Ácido: &lt;5.5</span>
+                        <span>Neutro: 5.5-7.5</span>
+                        <span>Alcalino: &gt;7.5</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                        <div id="ph-suelo-bar" class="bg-amber-400 h-2.5 rounded-full transition-all duration-500"
+                            style="width: 0%"></div>
+                    </div>
+                </div>
+                <button onclick="openManualControl('ph-suelo')"
+                    class="w-full mt-4 bg-amber-500 hover:bg-amber-600 text-white py-2 px-4 rounded-lg transition-colors"
+                    id="ph-suelo-btn">
+                    <i class="fas fa-cogs mr-2"></i>Control Manual
+                </button>
+            </div>
+        </section>
+
+
+        <!-- Manual Control Modal -->
+        <div id="manual-control-modal"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
+                <div class="bg-green-600 text-white px-6 py-4 rounded-t-xl flex justify-between items-center">
+                    <h3 class="text-xl font-bold" id="modal-title">Control Manual - Corrección de pH</h3>
+                    <button onclick="closeManualControl()" class="text-white hover:text-green-100">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-6">
+                        <!-- Válvula 1 -->
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium" id="valvula1-name">Bomba de Ácido</span>
+                            <div class="relative inline-block">
+                                <input type="checkbox" id="valvula1-toggle" class="sr-only"
+                                    onchange="toggleValvula('valvula1')">
+                                <label for="valvula1-toggle" class="flex items-center cursor-pointer">
+                                    <div id="valvula1-switch"
+                                        class="relative w-14 h-8 bg-gray-300 rounded-full shadow-inner transition-colors duration-300">
+                                        <div id="valvula1-circle"
+                                            class="absolute w-6 h-6 bg-white rounded-full shadow-md top-1 left-1 transition-transform duration-300">
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Válvula 2 -->
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium" id="valvula2-name">Bomba de Base</span>
+                            <div class="relative inline-block">
+                                <input type="checkbox" id="valvula2-toggle" class="sr-only"
+                                    onchange="toggleValvula('valvula2')">
+                                <label for="valvula2-toggle" class="flex items-center cursor-pointer">
+                                    <div id="valvula2-switch"
+                                        class="relative w-14 h-8 bg-gray-300 rounded-full shadow-inner transition-colors duration-300">
+                                        <div id="valvula2-circle"
+                                            class="absolute w-6 h-6 bg-white rounded-full shadow-md top-1 left-1 transition-transform duration-300">
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Control de Duración -->
+                        <div class="mt-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Duración (segundos)</label>
+                            <input type="number" id="duration-input" min="1" max="300" value="5"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-3 mt-6">
+                        <button onclick="closeManualControl()"
+                            class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-lg transition-colors">
+                            Cancelar
+                        </button>
+                        <button onclick="aplicarCambios()"
+                            class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors">
+                            Aplicar Cambios
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+      
+
+         <section class="mb-5">
+            <!-- Botón Centralizado para Historial Completo -->
+            <div class="row mb-4">
+                <div class="col-12 text-center">
+                    <button class="btn btn-primary btn-lg" onclick="abrirHistorialCompleto()">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Ver Historial Completo de Todos los Sensores
+                        <i class="fas fa-external-link-alt ms-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Gráfico pH Agua - SIN BOTÓN -->
+                <div class="col-lg-6 col-md-12">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-water me-2"></i>
+                                pH del Agua
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+                                <canvas id="phAguaChart"></canvas>
+                            </div>
+                            <div class="text-center mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Rango óptimo: 5.5-7.5 pH | Últimas 12 horas
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico pH Suelo - SIN BOTÓN -->
+                <div class="col-lg-6 col-md-12">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-mountain me-2"></i>
+                                pH del Suelo
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+                                <canvas id="phSueloChart"></canvas>
+                            </div>
+                            <div class="text-center mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Rango óptimo: 6.0-7.0 pH | Últimas 12 horas
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico TDS - SIN BOTÓN -->
+                <div class="col-lg-6 col-md-12">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-bolt me-2"></i>
+                                TDS (Nutrientes)
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+                                <canvas id="tdsChartIndividual"></canvas>
+                            </div>
+                            <div class="text-center mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Rango óptimo: 300-600 ppm | Últimas 12 horas
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico Temperatura - SIN BOTÓN -->
+                <div class="col-lg-6 col-md-12">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-thermometer-half me-2"></i>
+                                Temperatura
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+                                <canvas id="temperaturaChart"></canvas>
+                            </div>
+                            <div class="text-center mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Rango óptimo: 20-28°C | Últimas 12 horas
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modal Unificado para Historial Completo de Todos los Sensores -->
+        <div class="modal fade" id="historialCompletoModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-fullscreen">
+                <div class="modal-content">
+                    <div class="modal-header bg-dark text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-chart-area me-2"></i>
+                            Historial Completo - Sistema de Monitoreo HidroTec
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <!-- Controles Superiores -->
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <label for="periodo-select-unificado" class="form-label fw-bold">
+                                    <i class="fas fa-calendar-alt me-1"></i>
+                                    Período de tiempo:
+                                </label>
+                                <select id="periodo-select-unificado" class="form-select" onchange="cambiarPeriodoUnificado()">
+                                    <option value="24h">Últimas 24 horas</option>
+                                    <option value="7d">Últimos 7 días</option>
+                                    <option value="30d">Últimos 30 días</option>
+                                    <option value="90d">Últimos 3 meses</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-eye me-1"></i>
+                                    Vista:
+                                </label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="vista-radio" id="vista-individual" autocomplete="off" checked onchange="cambiarVistaHistorial('individual')">
+                                    <label class="btn btn-outline-primary" for="vista-individual">Individual</label>
+                                    
+                                    <input type="radio" class="btn-check" name="vista-radio" id="vista-combinada" autocomplete="off" onchange="cambiarVistaHistorial('combinada')">
+                                    <label class="btn btn-outline-primary" for="vista-combinada">Combinada</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button class="btn btn-success w-100" onclick="exportarTodosLosDatos()">
+                                    <i class="fas fa-download me-2"></i>
+                                    Exportar Todos los Datos
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Navegación por Pestañas (Vista Individual) -->
+                        <div id="tabs-container">
+                            <ul class="nav nav-tabs mb-4" id="sensoresTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="ph-agua-tab" data-bs-toggle="tab" data-bs-target="#ph-agua-pane" type="button" role="tab">
+                                        <i class="fas fa-water me-2"></i>pH del Agua
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="ph-suelo-tab" data-bs-toggle="tab" data-bs-target="#ph-suelo-pane" type="button" role="tab">
+                                        <i class="fas fa-mountain me-2"></i>pH del Suelo
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="tds-tab" data-bs-toggle="tab" data-bs-target="#tds-pane" type="button" role="tab">
+                                        <i class="fas fa-bolt me-2"></i>TDS (Nutrientes)
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="temperatura-tab" data-bs-toggle="tab" data-bs-target="#temperatura-pane" type="button" role="tab">
+                                        <i class="fas fa-thermometer-half me-2"></i>Temperatura
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <!-- Contenido de las Pestañas -->
+                            <div class="tab-content" id="sensoresTabsContent">
+                                <!-- pH Agua Tab -->
+                                <div class="tab-pane fade show active" id="ph-agua-pane" role="tabpanel">
+                                    <div class="row">
+                                        <div class="col-lg-8">
+                                            <div class="chart-container mb-4" style="position: relative; height: 400px;">
+                                                <canvas id="historial-ph-agua-chart"></canvas>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <div class="row g-3">
+                                                <div class="col-6 col-lg-12">
+                                                    <div class="card bg-primary text-white text-center">
+                                                        <div class="card-body py-3">
+                                                            <h4 class="card-title" id="stat-ph-agua-promedio">--</h4>
+                                                            <p class="card-text mb-0">Promedio</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-lg-12">
+                                                    <div class="card bg-success text-white text-center">
+                                                        <div class="card-body py-3">
+                                                            <h4 class="card-title" id="stat-ph-agua-maximo">--</h4>
+                                                            <p class="card-text mb-0">Máximo</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-lg-12">
+                                                    <div class="card bg-danger text-white text-center">
+                                                        <div class="card-body py-3">
+                                                            <h4 class="card-title" id="stat-ph-agua-minimo">--</h4>
+                                                            <p class="card-text mb-0">Mínimo</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-lg-12">
+                                                    <div class="card bg-info text-white text-center">
+                                                        <div class="card-body py-3">
+                                                            <h4 class="card-title" id="stat-ph-agua-total">--</h4>
+                                                            <p class="card-text mb-0">Registros</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- pH Suelo Tab -->
+                                <div class="tab-pane fade" id="ph-suelo-pane" role="tabpanel">
+                                    <div class="row">
+                                        <div class="col-lg-8">
+                                            <div class="chart-container mb-4" style="position: relative; height: 400px;">
+                                                <canvas id="historial-ph-suelo-chart"></canvas>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <div class="row g-3">
+                                                <div class="col-6 col-lg-12">
+                                                    <div class="card bg-primary text-white text-center">
+                                                        <div class="card-body py-3">
+                                                            <h4 class="card-title" id="stat-ph-suelo-promedio">--</h4>
+                                                            <p class="card-text mb-0">Promedio</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-lg-12">
+                                                    <div class="card bg-success text-white text-center">
+                                                        <div class="card-body py-3">
+                                                            <h4 class="card-title" id="stat-ph-suelo-maximo">--</h4>
+                                                            <p class="card-text mb-0">Máximo</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-lg-12">
+                                                    <div class="card bg-danger text-white text-center">
+                                                        <div class="card-body py-3">
+                                                            <h4 class="card-title" id="stat-ph-suelo-minimo">--</h4>
+                                                            <p class="card-text mb-0">Mínimo</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-lg-12">
+                                                    <div class="card bg-info text-white text-center">
+                                                        <div class="card-body py-3">
+                                                            <h4 class="card-title" id="stat-ph-suelo-total">--</h4>
+                                                            <p class="card-text mb-0">Registros</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- TDS Tab -->
+                                <div class="tab-pane fade" id="tds-pane" role="tabpanel">
+                                    <div class="row">
+                                        <div class="col-lg-8">
+                                            <div class="chart-container mb-4" style="position: relative; height: 400px;">
+                                                <canvas id="historial-tds-chart"></canvas>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <div class="row g-3">
+                                                <div class="col-6 col-lg-12">
+                                                    <div class="card bg-primary text-white text-center">
+                                                        <div class="card-body py-3">
+                                                            <h4 class="card-title" id="stat-tds-promedio">--</h4>
+                                                            <p class="card-text mb-0">Promedio</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-lg-12">
+                                                    <div class="card bg-success text-white text-center">
+                                                        <div class="card-body py-3">
+                                                            <h4 class="card-title" id="stat-tds-maximo">--</h4>
+                                                            <p class="card-text mb-0">Máximo</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-lg-12">
+                                                    <div class="card bg-danger text-white text-center">
+                                                        <div class="card-body py-3">
+                                                            <h4 class="card-title" id="stat-tds-minimo">--</h4>
+                                                            <p class="card-text mb-0">Mínimo</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-lg-12">
+                                                    <div class="card bg-info text-white text-center">
+                                                        <div class="card-body py-3">
+                                                            <h4 class="card-title" id="stat-tds-total">--</h4>
+                                                            <p class="card-text mb-0">Registros</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Temperatura Tab -->
+                                <div class="tab-pane fade" id="temperatura-pane" role="tabpanel">
+                                    <div class="row">
+                                        <div class="col-lg-8">
+                                            <div class="chart-container mb-4" style="position: relative; height: 400px;">
+                                                <canvas id="historial-temperatura-chart"></canvas>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <div class="row g-3">
+                                                <div class="col-6 col-lg-12">
+                                                    <div class="card bg-primary text-white text-center">
+                                                        <div class="card-body py-3">
+                                                            <h4 class="card-title" id="stat-temperatura-promedio">--</h4>
+                                                            <p class="card-text mb-0">Promedio</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-lg-12">
+                                                    <div class="card bg-success text-white text-center">
+                                                        <div class="card-body py-3">
+                                                            <h4 class="card-title" id="stat-temperatura-maximo">--</h4>
+                                                            <p class="card-text mb-0">Máximo</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-lg-12">
+                                                    <div class="card bg-danger text-white text-center">
+                                                        <div class="card-body py-3">
+                                                            <h4 class="card-title" id="stat-temperatura-minimo">--</h4>
+                                                            <p class="card-text mb-0">Mínimo</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-lg-12">
+                                                    <div class="card bg-info text-white text-center">
+                                                        <div class="card-body py-3">
+                                                            <h4 class="card-title" id="stat-temperatura-total">--</h4>
+                                                            <p class="card-text mb-0">Registros</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Vista Combinada (Oculta por defecto) -->
+                        <div id="vista-combinada-container" style="display: none;">
+                            <div class="chart-container mb-4" style="position: relative; height: 500px;">
+                                <canvas id="historial-combinado-chart"></canvas>
+                            </div>
+                            
+                            <!-- Estadísticas Combinadas -->
+                            <div class="row">
+                                <div class="col-12">
+                                    <h6 class="fw-bold mb-3">
+                                        <i class="fas fa-chart-bar me-2"></i>
+                                        Resumen General del Sistema:
+                                    </h6>
+                                </div>
+                                <div class="col-md-3 col-6 mb-3">
+                                    <div class="card bg-primary text-white text-center">
+                                        <div class="card-body py-3">
+                                            <h5 class="card-title" id="stat-general-ph-agua">--</h5>
+                                            <p class="card-text mb-0">pH Agua Promedio</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6 mb-3">
+                                    <div class="card bg-warning text-dark text-center">
+                                        <div class="card-body py-3">
+                                            <h5 class="card-title" id="stat-general-ph-suelo">--</h5>
+                                            <p class="card-text mb-0">pH Suelo Promedio</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6 mb-3">
+                                    <div class="card bg-success text-white text-center">
+                                        <div class="card-body py-3">
+                                            <h5 class="card-title" id="stat-general-tds">--</h5>
+                                            <p class="card-text mb-0">TDS Promedio</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6 mb-3">
+                                    <div class="card bg-danger text-white text-center">
+                                        <div class="card-body py-3">
+                                            <h5 class="card-title" id="stat-general-temperatura">--</h5>
+                                            <p class="card-text mb-0">Temp. Promedio</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div class="text-center text-sm text-gray-500">
+            <p>Último actualización: <span id="last-update">--</span></p>
+        </div>
+    </main>
+
+  // REEMPLAZAR TODO EL SCRIPT ENTRE <script> y </script> por este código:
+
+<script>
+
+    // AGREGAR ESTA FUNCIÓN DE DEBUG AL PRINCIPIO DEL SCRIPT:
+
+function verificarGraficos() {
+    console.log('🔍 VERIFICANDO ESTADO DE GRÁFICOS...');
+    
+    // Verificar que Chart.js esté disponible
+    console.log('Chart.js disponible:', typeof Chart !== 'undefined');
+    
+    // Verificar canvas
+    const canvases = ['phAguaChart', 'phSueloChart', 'tdsChartIndividual', 'temperaturaChart'];
+    canvases.forEach(id => {
+        const canvas = document.getElementById(id);
+        console.log(`Canvas ${id}:`, canvas ? 'ENCONTRADO' : 'NO ENCONTRADO');
+        if (canvas) {
+            console.log(`  - Dimensiones: ${canvas.width}x${canvas.height}`);
+            console.log(`  - Visible:`, canvas.offsetParent !== null);
+        }
+    });
+    
+    // Verificar gráficos globales
+    console.log('Gráficos globales:');
+    console.log('  - window.phAguaChart:', typeof window.phAguaChart);
+    console.log('  - window.phSueloChart:', typeof window.phSueloChart);
+    console.log('  - window.tdsChartIndividual:', typeof window.tdsChartIndividual);
+    console.log('  - window.temperaturaChart:', typeof window.temperaturaChart);
+    
+    // Probar generación de datos
+    console.log('🎲 Probando generación de datos...');
+    const testData = generarDatosHistorialSimulados('ph-agua', '24h');
+    console.log('Datos de prueba generados:', testData.length, 'elementos');
+    console.log('Primeros 3 datos:', testData.slice(0, 3));
+}
+
+// Hacer disponible globalmente
+window.verificarGraficos = verificarGraficos;
+    // ================================
+    // VARIABLES GLOBALES
+    // ================================
+    let globalAutoMode = false;
+    let activeValve = null;
+    let currentSensorType = '';
+
+    // Configuración de válvulas por tipo de sensor
+    const valveConfig = {
+        'ph-agua': {
+            title: 'Control Manual - Corrección de pH',
+            valvula1: 'Bomba de Ácido',
+            valvula2: 'Bomba de Base'
+        },
+        'ph-suelo': {
+            title: 'Control Manual - pH del Suelo',
+            valvula1: 'Riego Ácido',
+            valvula2: 'Riego Alcalino'
+        },
+        'tds': {
+            title: 'Control Manual - TDS',
+            valvula1: 'Bomba Nutrientes',
+            valvula2: 'Bomba Agua Pura'
+        },
+        'temperatura': {
+            title: 'Control Manual - Temperatura',
+            valvula1: 'Sistema Enfriamiento',
+            valvula2: 'Sistema Calentamiento'
+        }
+    };
+
+    // ================================
+    // FUNCIÓN PRINCIPAL - CARGAR DATOS DE SENSORES
+    // ================================
+    async function cargarDatosSensores() {
+        console.log('🔄 Iniciando carga de datos de sensores...');
+        
+        try {
+            console.log('📡 Haciendo petición a /api/datos-sensores');
+            const response = await fetch('/api/datos-sensores', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            
+            console.log('📋 Status de respuesta:', response.status);
+            
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status} - ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            console.log('📊 DATOS COMPLETOS RECIBIDOS:', JSON.stringify(data, null, 2));
+
+            if (data.success && data.datos) {
+                console.log('✅ Datos válidos recibidos, procesando...');
+                const { phAgua, phSuelo, tds, temperatura } = data.datos;
+
+                // ===== pH DEL AGUA =====
+                if (phAgua && typeof phAgua.valor === 'number') {
+                    console.log('💧 Procesando pH Agua:', phAgua);
+                    
+                    const valueElement = document.getElementById('ph-agua-value');
+                    const statusElement = document.getElementById('ph-agua-status');
+                    const barElement = document.getElementById('ph-agua-bar');
+                    
+                    if (valueElement && statusElement && barElement) {
+                        valueElement.textContent = phAgua.valor.toFixed(1);
+                        statusElement.textContent = phAgua.evaluacion.estado;
+                        statusElement.className = `px-2 py-1 rounded-full text-xs font-medium ${phAgua.evaluacion.clase}`;
+                        
+                        const progress = (phAgua.valor / 14) * 100;
+                        barElement.style.width = `${Math.max(progress, 5)}%`;
+                        
+                        console.log('✅ pH Agua actualizado:', phAgua.valor);
+                    } else {
+                        console.error('❌ No se encontraron elementos DOM para pH Agua');
+                    }
+                } else {
+                    console.warn('⚠️ pH Agua no válido:', phAgua);
+                }
+
+                // ===== pH DEL SUELO =====
+                if (phSuelo && typeof phSuelo.valor === 'number') {
+                    console.log('🏔️ Procesando pH Suelo:', phSuelo);
+                    
+                    const valueElement = document.getElementById('ph-suelo-value');
+                    const statusElement = document.getElementById('ph-suelo-status');
+                    const barElement = document.getElementById('ph-suelo-bar');
+                    
+                    if (valueElement && statusElement && barElement) {
+                        valueElement.textContent = phSuelo.valor.toFixed(1);
+                        statusElement.textContent = phSuelo.evaluacion.estado;
+                        statusElement.className = `px-2 py-1 rounded-full text-xs font-medium ${phSuelo.evaluacion.clase}`;
+                        
+                        const progress = (phSuelo.valor / 14) * 100;
+                        barElement.style.width = `${Math.max(progress, 5)}%`;
+                        
+                        console.log('✅ pH Suelo actualizado:', phSuelo.valor);
+                    } else {
+                        console.error('❌ No se encontraron elementos DOM para pH Suelo');
+                    }
+                } else {
+                    console.warn('⚠️ pH Suelo no válido:', phSuelo);
+                }
+
+                // ===== TDS =====
+                if (tds && typeof tds.valor === 'number') {
+                    console.log('⚡ Procesando TDS:', tds);
+                    
+                    const valueElement = document.getElementById('tds-value');
+                    const statusElement = document.getElementById('tds-status');
+                    const barElement = document.getElementById('tds-bar');
+                    
+                    if (valueElement && statusElement && barElement) {
+                        valueElement.textContent = Math.round(tds.valor);
+                        statusElement.textContent = tds.evaluacion.estado;
+                        statusElement.className = `px-2 py-1 rounded-full text-xs font-medium ${tds.evaluacion.clase}`;
+                        
+                        const progress = (tds.valor / 1500) * 100;
+                        barElement.style.width = `${Math.max(progress, 5)}%`;
+                        
+                        console.log('✅ TDS actualizado:', tds.valor);
+                    } else {
+                        console.error('❌ No se encontraron elementos DOM para TDS');
+                    }
+                } else {
+                    console.warn('⚠️ TDS no válido:', tds);
+                }
+
+                // ===== TEMPERATURA =====
+                if (temperatura && typeof temperatura.valor === 'number') {
+                    console.log('🌡️ Procesando Temperatura:', temperatura);
+                    
+                    const valueElement = document.getElementById('temp-value');
+                    const statusElement = document.getElementById('temp-status');
+                    const barElement = document.getElementById('temp-bar');
+                    
+                    if (valueElement && statusElement && barElement) {
+                        valueElement.textContent = temperatura.valor.toFixed(1);
+                        statusElement.textContent = temperatura.evaluacion.estado;
+                        statusElement.className = `px-2 py-1 rounded-full text-xs font-medium ${temperatura.evaluacion.clase}`;
+                        
+                        const progress = (temperatura.valor / 40) * 100;
+                        barElement.style.width = `${Math.max(progress, 5)}%`;
+                        
+                        console.log('✅ Temperatura actualizada:', temperatura.valor);
+                    } else {
+                        console.error('❌ No se encontraron elementos DOM para Temperatura');
+                    }
+                } else {
+                    console.warn('⚠️ Temperatura no válida:', temperatura);
+                }
+
+                // Actualizar timestamp
+                const timestampElement = document.getElementById('last-update');
+                if (timestampElement) {
+                    timestampElement.textContent = new Date().toLocaleString('es-ES');
+                }
+                
+                console.log('🎉 TODOS LOS DATOS ACTUALIZADOS CORRECTAMENTE');
+
+            } else {
+                console.error('❌ Respuesta del servidor no válida:', data);
+                mostrarErrorEnTarjetas();
+            }
+        } catch (error) {
+            console.error('💥 ERROR COMPLETO EN CARGA DE DATOS:', error);
+            console.error('📍 Stack trace:', error.stack);
+            mostrarErrorEnTarjetas();
+            
+            // Mostrar error específico en UI
+            const lastUpdate = document.getElementById('last-update');
+            if (lastUpdate) {
+                lastUpdate.textContent = `Error: ${error.message}`;
+                lastUpdate.style.color = 'red';
+            }
+        }
+    }
+
+    // ================================
+    // FUNCIÓN PARA MOSTRAR ERRORES
+    // ================================
+    function mostrarErrorEnTarjetas() {
+        console.log('🔴 Mostrando errores en todas las tarjetas...');
+        
+        const sensores = [
+            { value: 'ph-agua-value', status: 'ph-agua-status', bar: 'ph-agua-bar' },
+            { value: 'ph-suelo-value', status: 'ph-suelo-status', bar: 'ph-suelo-bar' },
+            { value: 'tds-value', status: 'tds-status', bar: 'tds-bar' },
+            { value: 'temp-value', status: 'temp-status', bar: 'temp-bar' }
+        ];
+        
+        sensores.forEach(sensor => {
+            const valueEl = document.getElementById(sensor.value);
+            const statusEl = document.getElementById(sensor.status);
+            const barEl = document.getElementById(sensor.bar);
+            
+            if (valueEl) valueEl.textContent = '--';
+            if (statusEl) {
+                statusEl.textContent = 'Sin conexión';
+                statusEl.className = 'px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800';
+            }
+            if (barEl) barEl.style.width = '0%';
+        });
+    }
+
+    // ================================
+    // FUNCIÓN TOGGLE MODO AUTOMÁTICO
+    // ================================
+    function toggleGlobalAutoMode() {
+        const toggle = document.getElementById('global-auto-toggle');
+        const switchElement = document.getElementById('global-auto-switch');
+        const circle = document.getElementById('global-auto-circle');
+        const autoModeText = document.getElementById('auto-mode-text');
+        const autoModeStatus = document.getElementById('auto-mode-status');
+        const autoButtonText = document.getElementById('auto-button-text');
+        const autoModeBar = document.getElementById('auto-mode-bar');
+
+        globalAutoMode = toggle.checked;
+
+        if (globalAutoMode) {
+            // ✅ ACTIVAR MODO AUTOMÁTICO
+            switchElement.classList.remove('bg-gray-400');
+            switchElement.classList.add('bg-green-500');
+            circle.classList.add('translate-x-5');
+
+            autoModeText.textContent = 'Activado';
+            autoModeText.className = 'text-lg font-bold text-green-800 mt-2';
+
+            autoModeStatus.textContent = 'Sistema Automático';
+            autoModeStatus.className = 'px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800';
+
+            autoButtonText.textContent = 'Desactivar Automático';
+            autoModeBar.style.width = '100%';
+            autoModeBar.classList.remove('bg-purple-400');
+            autoModeBar.classList.add('bg-green-400');
+
+            // 🚫 DESHABILITAR BOTONES
+            deshabilitarBotonesValvulas();
+
+            alert('✅ MODO AUTOMÁTICO ACTIVADO\n\n🔄 El sistema controlará automáticamente las válvulas\n🚫 Los controles manuales han sido DESHABILITADOS');
+
+        } else {
+            // ❌ DESACTIVAR MODO AUTOMÁTICO
+            switchElement.classList.remove('bg-green-500');
+            switchElement.classList.add('bg-gray-400');
+            circle.classList.remove('translate-x-5');
+
+            autoModeText.textContent = 'Desactivado';
+            autoModeText.className = 'text-lg font-bold text-purple-800 mt-2';
+
+            autoModeStatus.textContent = 'Sistema Manual';
+            autoModeStatus.className = 'px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800';
+
+            autoButtonText.textContent = 'Activar Automático';
+            autoModeBar.style.width = '0%';
+            autoModeBar.classList.remove('bg-green-400');
+            autoModeBar.classList.add('bg-purple-400');
+
+            // ✅ HABILITAR BOTONES
+            habilitarBotonesValvulas();
+
+            alert('❌ MODO AUTOMÁTICO DESACTIVADO\n\n✅ Los controles manuales están HABILITADOS\n🎛️ Ahora puedes controlar las válvulas manualmente');
+        }
+    }
+
+    // ================================
+    // FUNCIÓN PARA DESHABILITAR BOTONES
+    // ================================
+    function deshabilitarBotonesValvulas() {
+        const botones = ['ph-agua-btn', 'ph-suelo-btn', 'tds-btn', 'temperatura-btn'];
+
+        botones.forEach(btnId => {
+            const boton = document.getElementById(btnId);
+            if (boton) {
+                boton.disabled = true;
+                boton.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        });
+    }
+
+    // ================================
+    // FUNCIÓN PARA HABILITAR BOTONES
+    // ================================
+    function habilitarBotonesValvulas() {
+        const botones = ['ph-agua-btn', 'ph-suelo-btn', 'tds-btn', 'temperatura-btn'];
+
+        botones.forEach(btnId => {
+            const boton = document.getElementById(btnId);
+            if (boton) {
+                boton.disabled = false;
+                boton.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        });
+    }
+
+    // ================================
+    // FUNCIÓN PARA ABRIR CONTROL MANUAL
+    // ================================
+    function openManualControl(sensorType) {
+        // ✅ VERIFICAR SI MODO AUTOMÁTICO ESTÁ ACTIVADO
+        if (globalAutoMode) {
+            alert('🚫 NO SE PUEDE ACCEDER AL CONTROL MANUAL\n\nEl modo automático está activado.\nDesactívelo primero para usar los controles manuales.');
+            return;
+        }
+
+        currentSensorType = sensorType;
+        const modal = document.getElementById('manual-control-modal');
+        const title = document.getElementById('modal-title');
+        const config = valveConfig[sensorType];
+
+        if (config) {
+            title.textContent = config.title;
+            document.getElementById('valvula1-name').textContent = config.valvula1;
+            document.getElementById('valvula2-name').textContent = config.valvula2;
+        }
+
+        resetValves();
+        modal.classList.remove('hidden');
+    }
+
+    // ================================
+    // FUNCIONES DE VÁLVULAS
+    // ================================
+    function closeManualControl() {
+        document.getElementById('manual-control-modal').classList.add('hidden');
+        resetValves();
+    }
+
+    function toggleValvula(valveId) {
+        const toggle = document.getElementById(`${valveId}-toggle`);
+        const otherValveId = valveId === 'valvula1' ? 'valvula2' : 'valvula1';
+        const otherToggle = document.getElementById(`${otherValveId}-toggle`);
+
+        if (toggle.checked) {
+            if (otherToggle.checked) {
+                otherToggle.checked = false;
+                toggleValveVisual(otherValveId, false);
+            }
+            activeValve = valveId;
+            toggleValveVisual(valveId, true);
+        } else {
+            activeValve = null;
+            toggleValveVisual(valveId, false);
+        }
+    }
+
+    function toggleValveVisual(valveId, isOn) {
+        const switchElement = document.getElementById(`${valveId}-switch`);
+        const circle = document.getElementById(`${valveId}-circle`);
+
+        if (isOn) {
+            switchElement.classList.remove('bg-gray-300');
+            switchElement.classList.add('bg-green-500');
+            circle.classList.add('translate-x-6');
+        } else {
+            switchElement.classList.remove('bg-green-500');
+            switchElement.classList.add('bg-gray-300');
+            circle.classList.remove('translate-x-6');
+        }
+    }
+
+    function resetValves() {
+        ['valvula1', 'valvula2'].forEach(valveId => {
+            const toggle = document.getElementById(`${valveId}-toggle`);
+            toggle.checked = false;
+            toggleValveVisual(valveId, false);
+        });
+        activeValve = null;
+    }
+
+    function aplicarCambios() {
+        const duration = document.getElementById('duration-input').value;
+
+        if (activeValve) {
+            const valveName = document.getElementById(`${activeValve}-name`).textContent;
+            alert(`Aplicando cambios:\n${valveName} activada por ${duration} segundos`);
+
+            setTimeout(() => {
+                alert(`${valveName} completada`);
+                resetValves();
+            }, duration * 1000);
+
+            closeManualControl();
+        } else {
+            alert('Seleccione una válvula para activar');
+        }
+    }
+
+    // ================================
+    // FUNCIONES DE GRÁFICOS
+    // ================================
+    function initializeCharts() {
+        const ctx1 = document.getElementById('phTempChart').getContext('2d');
+        const ctx2 = document.getElementById('tdsChart').getContext('2d');
+
+        window.phTempChart = new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'pH Agua',
+                    data: [],
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4
+                }, {
+                    label: 'pH Suelo',
+                    data: [],
+                    borderColor: 'rgb(245, 158, 11)',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    tension: 0.4
+                }, {
+                    label: 'Temperatura (°C)',
+                    data: [],
+                    borderColor: 'rgb(239, 68, 68)',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 35
+                    }
+                }
+            }
+        });
+
+        window.tdsChart = new Chart(ctx2, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'TDS (ppm)',
+                    data: [],
+                    borderColor: 'rgb(34, 197, 94)',
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 1500
+                    }
+                }
+            }
+        });
+    }
+
+    function updateData() {
+        const now = new Date();
+        const timeLabel = now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
+
+        const phAgua = (Math.random() * 2 + 5.5).toFixed(1);
+        const phSuelo = (Math.random() * 2 + 6.0).toFixed(1);
+        const temp = (Math.random() * 8 + 20).toFixed(1);
+        const tds = Math.floor(Math.random() * 500 + 400);
+
+        window.phTempChart.data.labels.push(timeLabel);
+        window.phTempChart.data.datasets[0].data.push(phAgua);
+        window.phTempChart.data.datasets[1].data.push(phSuelo);
+        window.phTempChart.data.datasets[2].data.push(temp);
+
+        window.tdsChart.data.labels.push(timeLabel);
+        window.tdsChart.data.datasets[0].data.push(tds);
+
+        if (window.phTempChart.data.labels.length > 10) {
+            window.phTempChart.data.labels.shift();
+            window.phTempChart.data.datasets.forEach(dataset => dataset.data.shift());
+            window.tdsChart.data.labels.shift();
+            window.tdsChart.data.datasets[0].data.shift();
+        }
+
+        window.phTempChart.update();
+        window.tdsChart.update();
+    }
+
+    // ================================
+    // FUNCIÓN DE LOGOUT
+    // ================================
+    function logout() {
+        if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+            localStorage.removeItem('user');
+            localStorage.removeItem('userType');
+            window.location.href = '/frontend/index.html';
+        }
+    }
+
+    // ================================
+    // INICIALIZACIÓN PRINCIPAL
+    // ================================
+    // BUSCAR LA FUNCIÓN window.onload Y AGREGAR LA INICIALIZACIÓN:
+
+// MODIFICAR la función window.onload para inicializar correctamente:
+
+window.onload = function () {
+    console.log('🚀 =================================');
+    console.log('🚀 INICIALIZANDO HIDROTEC PANEL');
+    console.log('🚀 =================================');
+    
+    // ... código de autenticación existente ...
+
+    // ✅ CARGAR DATOS INMEDIATAMENTE
+    console.log('📊 Iniciando carga inicial de datos...');
+    cargarDatosSensores();
+
+    // ✅ ACTUALIZAR CADA 15 SEGUNDOS
+    console.log('⏰ Configurando actualización automática cada 15 segundos...');
+    setInterval(cargarDatosSensores, 15000);
+
+    // ✅ INICIALIZAR GRÁFICOS CON RETRASO MAYOR
+    console.log('📈 Programando inicialización de gráficos...');
+    setTimeout(() => {
+        console.log('🎯 Ejecutando inicialización de gráficos...');
+        initializeIndividualCharts();
+        
+        // Verificar después de 1 segundo adicional
+        setTimeout(() => {
+            verificarGraficos();
+        }, 1000);
+    }, 3000); // 3 segundos de retraso
+
+    // ... resto del código existente ...
+    
+    console.log('✅ PANEL INICIALIZADO CORRECTAMENTE');
+};
+    // EVENT LISTENERS
+    // ================================
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('📋 Configurando event listeners...');
+        
+        const configBtn = document.getElementById('config-btn');
+        const profileModal = document.getElementById('profile-modal');
+        const closeModal = document.getElementById('close-modal');
+        const cancelEdit = document.getElementById('cancel-edit');
+
+        if (configBtn && profileModal) {
+            configBtn.addEventListener('click', function () {
+                profileModal.classList.remove('hidden');
+            });
+        }
+
+        if (closeModal) {
+            closeModal.addEventListener('click', function () {
+                profileModal.classList.add('hidden');
+            });
+        }
+
+        if (cancelEdit) {
+            cancelEdit.addEventListener('click', function () {
+                profileModal.classList.add('hidden');
+            });
+        }
+
+        if (profileModal) {
+            profileModal.addEventListener('click', function (e) {
+                if (e.target === profileModal) {
+                    profileModal.classList.add('hidden');
+                }
+            });
+        }
+    });
+
+    // ================================
+    // FUNCIÓN DE DEBUG MANUAL
+    // ================================
+    function debugCargarDatos() {
+        console.log('🔧 DEBUG MANUAL - Cargando datos...');
+        cargarDatosSensores();
+    }
+
+    // Hacer disponible la función de debug en consola
+    window.debugCargarDatos = debugCargarDatos;
+    window.cargarDatosSensores = cargarDatosSensores;
+    
+    // AGREGAR estas funciones ANTES del cierre del script (antes de las últimas líneas):
+
+    // ================================
+    // VARIABLES GLOBALES PARA GRÁFICOS INDIVIDUALES
+    // ================================
+    let phAguaChart = null;
+    let phSueloChart = null;
+    let tdsChartIndividual = null;
+    let temperaturaChart = null;
+    let historialChart = null;
+    let currentSensorHistorial = '';
+
+   let historialCharts = {
+        phAgua: null,
+        phSuelo: null,
+        tds: null,
+        temperatura: null,
+        combinado: null
+    };
+    let currentPeriodoUnificado = '24h';
+    let currentVistaHistorial = 'individual';
+
+    // ================================
+    // FUNCIÓN PARA ABRIR HISTORIAL COMPLETO UNIFICADO
+    // ================================
+    function abrirHistorialCompleto() {
+        console.log('📊 Abriendo historial completo unificado...');
+        
+        // Mostrar modal usando Bootstrap
+        const modal = new bootstrap.Modal(document.getElementById('historialCompletoModal'));
+        modal.show();
+        
+        // Cargar datos de todos los sensores
+        cargarTodosLosHistoriales('24h');
+    }
+
+    // ================================
+    // FUNCIÓN PARA CARGAR TODOS LOS HISTORIALES
+    // ================================
+    async function cargarTodosLosHistoriales(periodo) {
+        console.log(`📈 Cargando historiales de todos los sensores - Período: ${periodo}`);
+        
+        try {
+            // Cargar datos simulados para cada sensor
+            const sensores = ['ph-agua', 'ph-suelo', 'tds', 'temperatura'];
+            
+            for (const sensor of sensores) {
+                await cargarHistorialSensor(sensor, periodo);
+            }
+            
+            // Si está en vista combinada, crear gráfico combinado
+            if (currentVistaHistorial === 'combinada') {
+                crearGraficoCombinado(periodo);
+            }
+            
+        } catch (error) {
+            console.error('Error cargando historiales:', error);
+        }
+    }
+
+    // ================================
+    // FUNCIÓN PARA CARGAR HISTORIAL DE UN SENSOR ESPECÍFICO
+    // ================================
+    // BUSCAR Y REEMPLAZAR LA FUNCIÓN cargarHistorialSensor:
+
+async function cargarHistorialSensor(sensorType, periodo) {
+    console.log(`📊 Cargando historial para sensor: ${sensorType}`);
+    
+    try {
+        // Intentar cargar datos reales primero
+        const response = await fetch(`/api/historial/${sensorType}?limite=24`);
+        
+        if (response.ok) {
+            const data = await response.json();
+            
+            if (data.success && data.historial && data.historial.length > 0) {
+                console.log(`✅ Datos reales encontrados para ${sensorType}:`, data.historial.length);
+                
+                const datosFormateados = data.historial.map(item => ({
+                    fecha: new Date(item.fecha),
+                    valor: parseFloat(item.valor)
+                }));
+                
+                crearGraficoHistorialIndividual(sensorType, datosFormateados);
+                actualizarEstadisticasIndividuales(sensorType, datosFormateados);
+                return;
+            }
+        }
+    } catch (error) {
+        console.warn(`⚠️ Error cargando datos reales para ${sensorType}:`, error);
+    }
+    
+    // Fallback a datos simulados
+    console.log(`📊 Generando datos simulados para ${sensorType}`);
+    const datos = generarDatosHistorialSimulados(sensorType, periodo);
+    crearGraficoHistorialIndividual(sensorType, datos);
+    actualizarEstadisticasIndividuales(sensorType, datos);
+}
+
+    // ================================
+    // FUNCIÓN PARA CREAR GRÁFICO INDIVIDUAL EN MODAL
+    // ================================
+    function crearGraficoHistorialIndividual(sensorType, datos) {
+        const canvasId = `historial-${sensorType.replace('-', '-')}-chart`;
+        const ctx = document.getElementById(canvasId)?.getContext('2d');
+        
+        if (!ctx) {
+            console.error(`Canvas no encontrado: ${canvasId}`);
+            return;
+        }
+        
+        // Destruir gráfico anterior si existe
+        const chartKey = sensorType.replace('-', '');
+        if (historialCharts[chartKey]) {
+            historialCharts[chartKey].destroy();
+        }
+        
+        // Preparar datos
+        const labels = datos.map(item => {
+            const fecha = new Date(item.fecha);
+            return currentPeriodoUnificado === '24h' || currentPeriodoUnificado === '7d' 
+                ? fecha.getHours().toString().padStart(2, '0') + ':' + fecha.getMinutes().toString().padStart(2, '0')
+                : fecha.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' });
+        });
+        
+        const values = datos.map(item => item.valor);
+        
+        // Configurar colores según sensor
+        const colores = {
+            'ph-agua': { bg: 'rgba(13, 110, 253, 0.2)', border: 'rgba(13, 110, 253, 1)' },
+            'ph-suelo': { bg: 'rgba(255, 193, 7, 0.2)', border: 'rgba(255, 193, 7, 1)' },
+            'tds': { bg: 'rgba(25, 135, 84, 0.2)', border: 'rgba(25, 135, 84, 1)' },
+            'temperatura': { bg: 'rgba(220, 53, 69, 0.2)', border: 'rgba(220, 53, 69, 1)' }
+        };
+        
+        const color = colores[sensorType];
+        
+        historialCharts[chartKey] = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: `${sensorType.toUpperCase()} - Historial`,
+                    data: values,
+                    backgroundColor: color.bg,
+                    borderColor: color.border,
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: color.border,
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0,0,0,0.1)'
+                        },
+                        ticks: {
+                            color: '#6c757d'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            maxTicksLimit: 12,
+                            color: '#6c757d'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleColor: 'white',
+                        bodyColor: 'white',
+                        borderColor: color.border,
+                        borderWidth: 1
+                    }
+                }
+            }
+        });
+    }
+
+    // ================================
+    // FUNCIÓN PARA ACTUALIZAR ESTADÍSTICAS INDIVIDUALES
+    // ================================
+    function actualizarEstadisticasIndividuales(sensorType, datos) {
+        if (!datos || datos.length === 0) return;
+        
+        const valores = datos.map(item => parseFloat(item.valor));
+        const promedio = (valores.reduce((a, b) => a + b, 0) / valores.length).toFixed(2);
+        const maximo = Math.max(...valores).toFixed(2);
+        const minimo = Math.min(...valores).toFixed(2);
+        const total = datos.length;
+        
+        // Unidades según el sensor
+        const unidades = {
+            'ph-agua': 'pH',
+            'ph-suelo': 'pH',
+            'tds': 'ppm',
+            'temperatura': '°C'
+        };
+        
+        const unidad = unidades[sensorType] || '';
+        const sensorKey = sensorType.replace('-', '-');
+        
+        document.getElementById(`stat-${sensorKey}-promedio`).textContent = `${promedio} ${unidad}`;
+        document.getElementById(`stat-${sensorKey}-maximo`).textContent = `${maximo} ${unidad}`;
+        document.getElementById(`stat-${sensorKey}-minimo`).textContent = `${minimo} ${unidad}`;
+        document.getElementById(`stat-${sensorKey}-total`).textContent = total;
+    }
+
+    // ================================
+    // FUNCIÓN PARA CAMBIAR PERÍODO
+    // ================================
+    function cambiarPeriodoUnificado() {
+        const periodo = document.getElementById('periodo-select-unificado').value;
+        currentPeriodoUnificado = periodo;
+        cargarTodosLosHistoriales(periodo);
+    }
+
+    // ================================
+    // FUNCIÓN PARA CAMBIAR VISTA
+    // ================================
+    function cambiarVistaHistorial(vista) {
+        currentVistaHistorial = vista;
+        
+        const tabsContainer = document.getElementById('tabs-container');
+        const vistaCombinadaContainer = document.getElementById('vista-combinada-container');
+        
+        if (vista === 'individual') {
+            tabsContainer.style.display = 'block';
+            vistaCombinadaContainer.style.display = 'none';
+        } else {
+            tabsContainer.style.display = 'none';
+            vistaCombinadaContainer.style.display = 'block';
+            crearGraficoCombinado(currentPeriodoUnificado);
+        }
+    }
+
+    // ================================
+    // FUNCIÓN PARA CREAR GRÁFICO COMBINADO
+    // ================================
+   // BUSCAR LA FUNCIÓN crearGraficoCombinado Y REEMPLAZAR ESTA LÍNEA (aproximadamente línea 1020):
+// CAMBIAR ESTA LÍNEA QUE ESTÁ MAL:
+// const datosCombinadosxs = {};
+
+// POR ESTA LÍNEA CORRECTA:
+function crearGraficoCombinado(periodo) {
+    const ctx = document.getElementById('historial-combinado-chart').getContext('2d');
+    
+    // Destruir gráfico anterior si existe
+    if (historialCharts.combinado) {
+        historialCharts.combinado.destroy();
+    }
+    
+    // Generar datos para todos los sensores - CORREGIR ESTA PARTE:
+    const sensores = ['ph-agua', 'ph-suelo', 'tds', 'temperatura'];
+    const datosCombinados = {}; // ✅ CAMBIAR AQUÍ - era "datosCombinadosxs"
+    
+    sensores.forEach(sensor => {
+        datosCombinados[sensor] = generarDatosHistorialSimulados(sensor, periodo); // ✅ CAMBIAR AQUÍ
+    });
+    
+    // Preparar labels (usar los del primer sensor)
+    const labels = datosCombinados['ph-agua'].map(item => {
+        const fecha = new Date(item.fecha);
+        return periodo === '24h' || periodo === '7d' 
+            ? fecha.getHours().toString().padStart(2, '0') + ':' + fecha.getMinutes().toString().padStart(2, '0')
+            : fecha.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' });
+    });
+    
+    // Crear datasets
+    const datasets = [
+        {
+            label: 'pH Agua',
+            data: datosCombinados['ph-agua'].map(item => item.valor),
+            borderColor: 'rgba(13, 110, 253, 1)',
+            backgroundColor: 'rgba(13, 110, 253, 0.1)',
+            yAxisID: 'y1',
+            tension: 0.4,
+            borderWidth: 2
+        },
+        {
+            label: 'pH Suelo',
+            data: datosCombinados['ph-suelo'].map(item => item.valor),
+            borderColor: 'rgba(255, 193, 7, 1)',
+            backgroundColor: 'rgba(255, 193, 7, 0.1)',
+            yAxisID: 'y1',
+            tension: 0.4,
+            borderWidth: 2
+        },
+        {
+            label: 'TDS (ppm)',
+            data: datosCombinados['tds'].map(item => item.valor),
+            borderColor: 'rgba(25, 135, 84, 1)',
+            backgroundColor: 'rgba(25, 135, 84, 0.1)',
+            yAxisID: 'y2',
+            tension: 0.4,
+            borderWidth: 2
+        },
+        {
+            label: 'Temperatura (°C)',
+            data: datosCombinados['temperatura'].map(item => item.valor),
+            borderColor: 'rgba(220, 53, 69, 1)',
+            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+            yAxisID: 'y1', // ✅ CAMBIAR A y1 para que se vea mejor
+            tension: 0.4,
+            borderWidth: 2
+        }
+    ];
+    
+    historialCharts.combinado = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            scales: {
+                x: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Tiempo'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'pH / Temperatura'
+                    },
+                    min: 0,
+                    max: 35
+                },
+                y2: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'TDS (ppm)'
+                    },
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                    min: 0,
+                    max: 1000
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            }
+        }
+    });
+    
+    // Actualizar estadísticas generales
+    actualizarEstadisticasGenerales(datosCombinados);
+}
+    // ================================
+    // FUNCIÓN PARA ACTUALIZAR ESTADÍSTICAS GENERALES
+    // ================================
+    function actualizarEstadisticasGenerales(datosCombinados) {
+        const sensores = ['ph-agua', 'ph-suelo', 'tds', 'temperatura'];
+        
+        sensores.forEach(sensor => {
+            const valores = datosCombinados[sensor].map(item => parseFloat(item.valor));
+            const promedio = (valores.reduce((a, b) => a + b, 0) / valores.length).toFixed(2);
+            
+            const unidades = {
+                'ph-agua': 'pH',
+                'ph-suelo': 'pH',
+                'tds': 'ppm',
+                'temperatura': '°C'
+            };
+            
+            const elementId = `stat-general-${sensor.replace('-', '-')}`;
+            const elemento = document.getElementById(elementId);
+            if (elemento) {
+                elemento.textContent = `${promedio} ${unidades[sensor]}`;
+            }
+        });
+    }
+
+    // ================================
+    // FUNCIÓN PARA EXPORTAR TODOS LOS DATOS
+    // ================================
+    function exportarTodosLosDatos() {
+        alert('📊 Exportando todos los datos del sistema...\n\n📁 Esta funcionalidad se implementará próximamente.\n\n✅ Se exportarán datos de todos los sensores en formato CSV.');
+    }
+
+    // ================================
+    // EVENT LISTENER PARA CERRAR MODAL
+    // ================================
+    document.getElementById('historialCompletoModal').addEventListener('hidden.bs.modal', function () {
+        // Destruir todos los gráficos al cerrar el modal
+        Object.keys(historialCharts).forEach(key => {
+            if (historialCharts[key]) {
+                historialCharts[key].destroy();
+                historialCharts[key] = null;
+            }
+        });
+        console.log('📊 Modal de historial cerrado y gráficos destruidos');
+    });
+
+  // REEMPLAZAR las funciones del historial unificado con estas versiones mejoradas:
+
+    // ================================
+    // FUNCIÓN PARA CARGAR TODOS LOS HISTORIALES CON DATOS REALES
+    // ================================
+    async function cargarTodosLosHistoriales(periodo) {
+        console.log(`📈 Cargando datos reales de DB - Período: ${periodo}`);
+        
+        try {
+            // Si es datos mensuales, usar endpoint específico
+            if (periodo === '30d' || periodo === '90d') {
+                await cargarDatosMensualesReales(periodo);
+            } else {
+                // Para períodos cortos, usar datos simulados o endpoint de historial
+                const sensores = ['ph-agua', 'ph-suelo', 'tds', 'temperatura'];
+                
+                for (const sensor of sensores) {
+                    await cargarHistorialSensorReal(sensor, periodo);
+                }
+            }
+            
+            // Si está en vista combinada, crear gráfico combinado
+            if (currentVistaHistorial === 'combinada') {
+                await crearGraficoCombinadoReal(periodo);
+            }
+            
+        } catch (error) {
+            console.error('Error cargando historiales reales:', error);
+            // Fallback a datos simulados
+            cargarHistorialesSimulados(periodo);
+        }
+    }
+
+    // ================================
+    // FUNCIÓN PARA CARGAR DATOS MENSUALES REALES
+    // ================================
+    async function cargarDatosMensualesReales(periodo) {
+        console.log('📅 Cargando datos mensuales reales de la base de datos...');
+        
+        try {
+            const añoActual = new Date().getFullYear();
+            const response = await fetch(`/api/todos-datos-mensuales?año=${añoActual}`);
+            
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('📊 Datos mensuales recibidos:', data);
+            
+            if (data.success && data.datos) {
+                const sensores = ['ph-agua', 'ph-suelo', 'tds', 'temperatura'];
+                
+                sensores.forEach(sensor => {
+                    const datosFormateados = formatearDatosMensuales(data.datos[sensor] || []);
+                    crearGraficoHistorialIndividual(sensor, datosFormateados);
+                    actualizarEstadisticasIndividuales(sensor, datosFormateados);
+                });
+                
+                console.log('✅ Gráficos mensuales creados correctamente');
+            } else {
+                throw new Error('Datos mensuales no válidos');
+            }
+            
+        } catch (error) {
+            console.error('❌ Error cargando datos mensuales:', error);
+            // Fallback a datos simulados
+            cargarHistorialesSimulados(periodo);
+        }
+    }
+
+    // ================================
+    // FUNCIÓN PARA CARGAR HISTORIAL REAL DE UN SENSOR
+    // ================================
+    async function cargarHistorialSensorReal(sensorType, periodo) {
+        console.log(`📊 Cargando historial real para sensor: ${sensorType}`);
+        
+        try {
+            // Determinar límite según el período
+            const limites = {
+                '24h': 24,
+                '7d': 168, // 7 días * 24 horas
+                '30d': 30,
+                '90d': 90
+            };
+            
+            const limite = limites[periodo] || 10;
+            const response = await fetch(`/api/historial/${sensorType}?limite=${limite}`);
+            
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log(`📈 Historial real de ${sensorType}:`, data);
+            
+            if (data.success && data.historial) {
+                const datosFormateados = data.historial.map(item => ({
+                    fecha: new Date(item.fecha),
+                    valor: parseFloat(item.valor),
+                    evaluacion: item.evaluacion
+                }));
+                
+                crearGraficoHistorialIndividual(sensorType, datosFormateados);
+                actualizarEstadisticasIndividuales(sensorType, datosFormateados);
+                
+                console.log(`✅ Gráfico real de ${sensorType} creado`);
+            } else {
+                console.warn(`⚠️ Sin datos reales para ${sensorType}, usando simulados`);
+                const datosSimulados = generarDatosHistorialSimulados(sensorType, periodo);
+                crearGraficoHistorialIndividual(sensorType, datosSimulados);
+                actualizarEstadisticasIndividuales(sensorType, datosSimulados);
+            }
+            
+        } catch (error) {
+            console.error(`❌ Error cargando historial real de ${sensorType}:`, error);
+            // Fallback a datos simulados
+            const datosSimulados = generarDatosHistorialSimulados(sensorType, periodo);
+            crearGraficoHistorialIndividual(sensorType, datosSimulados);
+            actualizarEstadisticasIndividuales(sensorType, datosSimulados);
+        }
+    }
+
+    // ================================
+    // FUNCIÓN PARA FORMATEAR DATOS MENSUALES
+    // ================================
+    function formatearDatosMensuales(datosMensuales) {
+        if (!datosMensuales || datosMensuales.length === 0) {
+            return [];
+        }
+        
+        return datosMensuales.map(item => ({
+            fecha: new Date(item.año, item.mes - 1, 15), // Día 15 del mes
+            valor: parseFloat(item.promedio),
+            mes: item.nombre_mes,
+            año: item.año,
+            total_registros: item.total_registros,
+            minimo: parseFloat(item.minimo),
+            maximo: parseFloat(item.maximo),
+            evaluacion: item.evaluacion
+        }));
+    }
+
+    // ================================
+    // FUNCIÓN PARA CREAR GRÁFICO COMBINADO CON DATOS REALES
+    // ================================
+    async function crearGraficoCombinadoReal(periodo) {
+        console.log('📊 Creando gráfico combinado con datos reales...');
+        
+        const ctx = document.getElementById('historial-combinado-chart').getContext('2d');
+        
+        // Destruir gráfico anterior si existe
+        if (historialCharts.combinado) {
+            historialCharts.combinado.destroy();
+        }
+        
+        try {
+            let datosCombinados = {};
+            
+            if (periodo === '30d' || periodo === '90d') {
+                // Usar datos mensuales
+                const añoActual = new Date().getFullYear();
+                const response = await fetch(`/api/todos-datos-mensuales?año=${añoActual}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const sensores = ['ph-agua', 'ph-suelo', 'tds', 'temperatura'];
+                    
+                    sensores.forEach(sensor => {
+                        datosCombinados[sensor] = formatearDatosMensuales(data.datos[sensor] || []);
+                    });
+                } else {
+                    throw new Error('Error obteniendo datos mensuales combinados');
+                }
+            } else {
+                // Usar datos de historial regular
+                const sensores = ['ph-agua', 'ph-suelo', 'tds', 'temperatura'];
+                
+                for (const sensor of sensores) {
+                    try {
+                        const response = await fetch(`/api/historial/${sensor}?limite=24`);
+                        const data = await response.json();
+                        
+                        if (data.success && data.historial) {
+                            datosCombinados[sensor] = data.historial.map(item => ({
+                                fecha: new Date(item.fecha),
+                                valor: parseFloat(item.valor)
+                            }));
+                        } else {
+                            datosCombinados[sensor] = generarDatosHistorialSimulados(sensor, periodo);
+                        }
+                    } catch (error) {
+                        console.warn(`Error cargando ${sensor}, usando datos simulados`);
+                        datosCombinados[sensor] = generarDatosHistorialSimulados(sensor, periodo);
+                    }
+                }
+            }
+            
+            // Verificar que tengamos datos
+            const primerSensor = Object.keys(datosCombinados)[0];
+            if (!datosCombinados[primerSensor] || datosCombinados[primerSensor].length === 0) {
+                throw new Error('No hay datos disponibles para el gráfico combinado');
+            }
+            
+            // Preparar labels
+            const labels = datosCombinados[primerSensor].map(item => {
+                const fecha = new Date(item.fecha);
+                if (periodo === '30d' || periodo === '90d') {
+                    return item.mes || fecha.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' });
+                } else if (periodo === '24h' || periodo === '7d') {
+                    return fecha.getHours().toString().padStart(2, '0') + ':' + fecha.getMinutes().toString().padStart(2, '0');
+                } else {
+                    return fecha.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' });
+                }
+            });
+            
+            // Crear datasets
+            const datasets = [
+                {
+                    label: 'pH Agua',
+                    data: datosCombinados['ph-agua'].map(item => item.valor),
+                    borderColor: 'rgba(13, 110, 253, 1)',
+                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                    yAxisID: 'y1',
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointBackgroundColor: 'rgba(13, 110, 253, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6
+                },
+                {
+                    label: 'pH Suelo',
+                    data: datosCombinados['ph-suelo'].map(item => item.valor),
+                    borderColor: 'rgba(255, 193, 7, 1)',
+                    backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                    yAxisID: 'y1',
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointBackgroundColor: 'rgba(255, 193, 7, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6
+                },
+                {
+                    label: 'TDS (ppm)',
+                    data: datosCombinados['tds'].map(item => item.valor),
+                    borderColor: 'rgba(25, 135, 84, 1)',
+                    backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                    yAxisID: 'y2',
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointBackgroundColor: 'rgba(25, 135, 84, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6
+                },
+                {
+                    label: 'Temperatura (°C)',
+                    data: datosCombinados['temperatura'].map(item => item.valor),
+                    borderColor: 'rgba(220, 53, 69, 1)',
+                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                    yAxisID: 'y3',
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointBackgroundColor: 'rgba(220, 53, 69, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6
+                }
+            ];
+            
+            historialCharts.combinado = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: periodo === '30d' || periodo === '90d' ? 'Mes' : 'Tiempo',
+                                font: { size: 14, weight: 'bold' }
+                            },
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'pH',
+                                font: { size: 14, weight: 'bold' }
+                            },
+                            min: 0,
+                            max: 14,
+                            grid: {
+                                color: 'rgba(13, 110, 253, 0.1)'
+                            }
+                        },
+                        y2: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'TDS (ppm)',
+                                font: { size: 14, weight: 'bold' }
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                                color: 'rgba(25, 135, 84, 0.1)'
+                            },
+                            min: 0,
+                            max: 1000
+                        },
+                        y3: {
+                            type: 'linear',
+                            display: false,
+                            min: 0,
+                            max: 50
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: { size: 12, weight: 'bold' },
+                                padding: 20
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: `Datos Reales del Sistema - ${periodo === '30d' ? 'Últimos 30 días' : periodo === '90d' ? 'Últimos 3 meses' : 'Período seleccionado'}`,
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: 'rgba(255,255,255,0.3)',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: true,
+                            callbacks: {
+                                title: function(context) {
+                                    return `📅 ${context[0].label}`;
+                                },
+                                label: function(context) {
+                                    const unidades = {
+                                        'pH Agua': '',
+                                        'pH Suelo': '',
+                                        'TDS (ppm)': ' ppm',
+                                        'Temperatura (°C)': '°C'
+                                    };
+                                    return `${context.dataset.label}: ${context.parsed.y}${unidades[context.dataset.label] || ''}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Actualizar estadísticas generales con datos reales
+            actualizarEstadisticasGenerales(datosCombinados);
+            
+            console.log('✅ Gráfico combinado con datos reales creado exitosamente');
+            
+        } catch (error) {
+            console.error('❌ Error creando gráfico combinado real:', error);
+            // Fallback a datos simulados
+            console.log('🔄 Creando gráfico combinado con datos simulados como respaldo...');
+            crearGraficoCombinadoSimulado(periodo);
+        }
+    }
+
+    
+    // ================================
+    // FUNCIÓN FALLBACK PARA DATOS SIMULADOS
+    // ================================
+    function cargarHistorialesSimulados(periodo) {
+        console.log('🔄 Usando datos simulados como respaldo...');
+        const sensores = ['ph-agua', 'ph-suelo', 'tds', 'temperatura'];
+        
+        sensores.forEach(sensor => {
+            const datos = generarDatosHistorialSimulados(sensor, periodo);
+            crearGraficoHistorialIndividual(sensor, datos);
+            actualizarEstadisticasIndividuales(sensor, datos);
+        });
+        
+        if (currentVistaHistorial === 'combinada') {
+            crearGraficoCombinadoSimulado(periodo);
+        }
+    }
+
+    function crearGraficoCombinadoSimulado(periodo) {
+        // La función original que ya tienes
+        crearGraficoCombinado(periodo);
+    }
+
+    // ================================
+    // ACTUALIZAR FUNCIÓN cambiarPeriodoUnificado PARA INCLUIR DATOS REALES
+    // ================================
+    function cambiarPeriodoUnificado() {
+        const periodo = document.getElementById('periodo-select-unificado').value;
+        currentPeriodoUnificado = periodo;
+        
+        console.log(`📅 Cambiando período a: ${periodo}`);
+        
+        // Mostrar indicador de carga
+        mostrarIndicadorCarga(true);
+        
+        // Cargar datos reales
+        cargarTodosLosHistoriales(periodo).finally(() => {
+            mostrarIndicadorCarga(false);
+        });
+    }
+
+    // ================================
+    // FUNCIÓN PARA MOSTRAR INDICADOR DE CARGA
+    // ================================
+    function mostrarIndicadorCarga(mostrar) {
+        // Agregar/remover clase de carga a los contenedores de gráficos
+        const containers = [
+            'historial-ph-agua-chart',
+            'historial-ph-suelo-chart', 
+            'historial-tds-chart',
+            'historial-temperatura-chart',
+            'historial-combinado-chart'
+        ];
+        
+        containers.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                const parent = element.parentElement;
+                if (mostrar) {
+                    parent.style.opacity = '0.6';
+                    parent.style.position = 'relative';
+                    
+                    // Agregar spinner si no existe
+                    if (!parent.querySelector('.loading-spinner')) {
+                        const spinner = document.createElement('div');
+                        spinner.className = 'loading-spinner position-absolute top-50 start-50 translate-middle';
+                        spinner.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div>';
+                        parent.appendChild(spinner);
+                    }
+                } else {
+                    parent.style.opacity = '1';
+                    const spinner = parent.querySelector('.loading-spinner');
+                    if (spinner) {
+                        spinner.remove();
+                    }
+                }
+            }
+        });
+    }
+    // AGREGAR ESTA FUNCIÓN DESPUÉS DE LA FUNCIÓN generarDatosHistorialSimulados:
+
+// ================================
+// FUNCIÓN PARA INICIALIZAR GRÁFICOS INDIVIDUALES
+// ================================
+// REEMPLAZAR COMPLETAMENTE la función initializeIndividualCharts:
+
+function initializeIndividualCharts() {
+    console.log('📊 =================================');
+    console.log('📊 INICIALIZANDO GRÁFICOS INDIVIDUALES');
+    console.log('📊 =================================');
+    
+    try {
+        // Verificar que Chart.js esté disponible
+        if (typeof Chart === 'undefined') {
+            console.error('❌ Chart.js no está cargado');
+            return;
+        }
+        
+        console.log('✅ Chart.js disponible, versión:', Chart.version || 'desconocida');
+
+        // 🌊 === pH AGUA CHART ===
+        console.log('🌊 Inicializando gráfico pH Agua...');
+        const phAguaCanvas = document.getElementById('phAguaChart');
+        if (phAguaCanvas) {
+            console.log('✅ Canvas phAguaChart encontrado');
+            
+            // Destruir gráfico anterior
+            if (window.phAguaChart && typeof window.phAguaChart.destroy === 'function') {
+                window.phAguaChart.destroy();
+                console.log('🗑️ Gráfico anterior destruido');
+            }
+            
+            // Generar datos de prueba
+            const datosPhAgua = generarDatosHistorialSimulados('ph-agua', '24h').slice(-8);
+            console.log('📈 Datos pH Agua generados:', datosPhAgua.length, 'puntos');
+            
+            const labelsPhAgua = datosPhAgua.map((item, index) => {
+                const hora = new Date().getHours() - 7 + index;
+                return `${(hora >= 0 ? hora : 24 + hora).toString().padStart(2, '0')}:00`;
+            });
+            const valoresPhAgua = datosPhAgua.map(item => item.valor);
+            
+            console.log('🏷️ Labels pH Agua:', labelsPhAgua);
+            console.log('📊 Valores pH Agua:', valoresPhAgua);
+            
+            const phAguaCtx = phAguaCanvas.getContext('2d');
+            
+            window.phAguaChart = new Chart(phAguaCtx, {
+                type: 'line',
+                data: {
+                    labels: labelsPhAgua,
+                    datasets: [{
+                        label: 'pH del Agua',
+                        data: valoresPhAgua,
+                        borderColor: 'rgba(13, 110, 253, 1)',
+                        backgroundColor: 'rgba(13, 110, 253, 0.2)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: 'rgba(13, 110, 253, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#333',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: 'rgba(13, 110, 253, 1)',
+                            borderWidth: 2,
+                            cornerRadius: 8,
+                            displayColors: true,
+                            callbacks: {
+                                label: function(context) {
+                                    return `pH: ${context.parsed.y.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 4,
+                            max: 10,
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#666',
+                                font: {
+                                    size: 12
+                                },
+                                callback: function(value) {
+                                    return value.toFixed(1) + ' pH';
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'pH Level',
+                                color: '#333',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#666',
+                                font: {
+                                    size: 11
+                                },
+                                maxTicksLimit: 6
+                            },
+                            title: {
+                                display: true,
+                                text: 'Hora',
+                                color: '#333',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+            
+            console.log('✅ pH Agua chart creado con', valoresPhAgua.length, 'datos');
+            console.log('🎯 Valores mostrados:', valoresPhAgua);
+        } else {
+            console.error('❌ Canvas phAguaChart NO encontrado');
+        }
+
+        // 🏔️ === pH SUELO CHART ===
+        console.log('🏔️ Inicializando gráfico pH Suelo...');
+        const phSueloCanvas = document.getElementById('phSueloChart');
+        if (phSueloCanvas) {
+            console.log('✅ Canvas phSueloChart encontrado');
+            
+            if (window.phSueloChart && typeof window.phSueloChart.destroy === 'function') {
+                window.phSueloChart.destroy();
+            }
+            
+            const datosPhSuelo = generarDatosHistorialSimulados('ph-suelo', '24h').slice(-8);
+            const labelsPhSuelo = datosPhSuelo.map((item, index) => {
+                const hora = new Date().getHours() - 7 + index;
+                return `${(hora >= 0 ? hora : 24 + hora).toString().padStart(2, '0')}:00`;
+            });
+            const valoresPhSuelo = datosPhSuelo.map(item => item.valor);
+            
+            console.log('📊 Valores pH Suelo:', valoresPhSuelo);
+            
+            const phSueloCtx = phSueloCanvas.getContext('2d');
+            
+            window.phSueloChart = new Chart(phSueloCtx, {
+                type: 'line',
+                data: {
+                    labels: labelsPhSuelo,
+                    datasets: [{
+                        label: 'pH del Suelo',
+                        data: valoresPhSuelo,
+                        borderColor: 'rgba(255, 193, 7, 1)',
+                        backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: 'rgba(255, 193, 7, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#333',
+                                font: { weight: 'bold' }
+                            }
+                        },
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: 'rgba(255, 193, 7, 1)',
+                            borderWidth: 2,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return `pH: ${context.parsed.y.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 5,
+                            max: 9,
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)'
+                            },
+                            ticks: {
+                                color: '#666',
+                                callback: function(value) {
+                                    return value.toFixed(1) + ' pH';
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'pH Level',
+                                color: '#333',
+                                font: { weight: 'bold' }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: '#666',
+                                maxTicksLimit: 6
+                            },
+                            title: {
+                                display: true,
+                                text: 'Hora',
+                                color: '#333',
+                                font: { weight: 'bold' }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            console.log('✅ pH Suelo chart creado');
+        } else {
+            console.error('❌ Canvas phSueloChart NO encontrado');
+        }
+
+        // ⚡ === TDS CHART ===
+        console.log('⚡ Inicializando gráfico TDS...');
+        const tdsCanvas = document.getElementById('tdsChartIndividual');
+        if (tdsCanvas) {
+            console.log('✅ Canvas tdsChartIndividual encontrado');
+            
+            if (window.tdsChartIndividual && typeof window.tdsChartIndividual.destroy === 'function') {
+                window.tdsChartIndividual.destroy();
+            }
+            
+            const datosTds = generarDatosHistorialSimulados('tds', '24h').slice(-8);
+            const labelsTds = datosTds.map((item, index) => {
+                const hora = new Date().getHours() - 7 + index;
+                return `${(hora >= 0 ? hora : 24 + hora).toString().padStart(2, '0')}:00`;
+            });
+            const valoresTds = datosTds.map(item => item.valor);
+            
+            console.log('📊 Valores TDS:', valoresTds);
+            
+            const tdsCtx = tdsCanvas.getContext('2d');
+            
+            window.tdsChartIndividual = new Chart(tdsCtx, {
+                type: 'line',
+                data: {
+                    labels: labelsTds,
+                    datasets: [{
+                        label: 'TDS (Nutrientes)',
+                        data: valoresTds,
+                        borderColor: 'rgba(25, 135, 84, 1)',
+                        backgroundColor: 'rgba(25, 135, 84, 0.2)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: 'rgba(25, 135, 84, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#333',
+                                font: { weight: 'bold' }
+                            }
+                        },
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: 'rgba(25, 135, 84, 1)',
+                            borderWidth: 2,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return `TDS: ${context.parsed.y} ppm`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 200,
+                            max: 1000,
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)'
+                            },
+                            ticks: {
+                                color: '#666',
+                                callback: function(value) {
+                                    return value + ' ppm';
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'TDS (ppm)',
+                                color: '#333',
+                                font: { weight: 'bold' }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: '#666',
+                                maxTicksLimit: 6
+                            },
+                            title: {
+                                display: true,
+                                text: 'Hora',
+                                color: '#333',
+                                font: { weight: 'bold' }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            console.log('✅ TDS chart creado');
+        } else {
+            console.error('❌ Canvas tdsChartIndividual NO encontrado');
+        }
+
+        // 🌡️ === TEMPERATURA CHART ===
+        console.log('🌡️ Inicializando gráfico Temperatura...');
+        const tempCanvas = document.getElementById('temperaturaChart');
+        if (tempCanvas) {
+            console.log('✅ Canvas temperaturaChart encontrado');
+            
+            if (window.temperaturaChart && typeof window.temperaturaChart.destroy === 'function') {
+                window.temperaturaChart.destroy();
+            }
+            
+            const datosTemp = generarDatosHistorialSimulados('temperatura', '24h').slice(-8);
+            const labelsTemp = datosTemp.map((item, index) => {
+                const hora = new Date().getHours() - 7 + index;
+                return `${(hora >= 0 ? hora : 24 + hora).toString().padStart(2, '0')}:00`;
+            });
+            const valoresTemp = datosTemp.map(item => item.valor);
+            
+            console.log('📊 Valores Temperatura:', valoresTemp);
+            
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            window.temperaturaChart = new Chart(tempCtx, {
+                type: 'line',
+                data: {
+                    labels: labelsTemp,
+                    datasets: [{
+                        label: 'Temperatura',
+                        data: valoresTemp,
+                        borderColor: 'rgba(220, 53, 69, 1)',
+                        backgroundColor: 'rgba(220, 53, 69, 0.2)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: 'rgba(220, 53, 69, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#333',
+                                font: { weight: 'bold' }
+                            }
+                        },
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: 'rgba(220, 53, 69, 1)',
+                            borderWidth: 2,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Temperatura: ${context.parsed.y.toFixed(1)}°C`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 15,
+                            max: 35,
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)'
+                            },
+                            ticks: {
+                                color: '#666',
+                                callback: function(value) {
+                                    return value + '°C';
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Temperatura (°C)',
+                                color: '#333',
+                                font: { weight: 'bold' }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: '#666',
+                                maxTicksLimit: 6
+                            },
+                            title: {
+                                display: true,
+                                text: 'Hora',
+                                color: '#333',
+                                font: { weight: 'bold' }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            console.log('✅ Temperatura chart creado');
+        } else {
+            console.error('❌ Canvas temperaturaChart NO encontrado');
+        }
+        
+        console.log('🎉 =================================');
+        console.log('🎉 TODOS LOS GRÁFICOS INICIALIZADOS');
+        console.log('🎉 =================================');
+        
+        // Verificar que todos los gráficos se crearon
+        const graficosCreados = [
+            window.phAguaChart ? '✅ pH Agua' : '❌ pH Agua',
+            window.phSueloChart ? '✅ pH Suelo' : '❌ pH Suelo', 
+            window.tdsChartIndividual ? '✅ TDS' : '❌ TDS',
+            window.temperaturaChart ? '✅ Temperatura' : '❌ Temperatura'
+        ];
+        
+        console.log('📊 Estado final de gráficos:');
+        graficosCreados.forEach(estado => console.log('  ' + estado));
+        
+    } catch (error) {
+        console.error('💥 ERROR CRÍTICO inicializando gráficos:', error);
+        console.error('📍 Stack trace completo:', error.stack);
+    }
+}
+    console.log('✅ Gráficos individuales inicializados');
+   
+</script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        /* Estilos personalizados para los toggles */
+        .translate-x-6 {
+            transform: translateX(1.5rem);
+        }
+
+        .translate-x-0 {
+            transform: translateX(0);
+        }
+
+        /* Transiciones suaves */
+        #toggle-circle,
+        #valvula1-circle,
+        #valvula2-circle {
+            transition: transform 0.3s ease;
+        }
+
+        #toggle-switch,
+        #valvula1-switch,
+        #valvula2-switch {
+            transition: background-color 0.3s ease;
+        }
+    </style>
+</body>
+
+</html>

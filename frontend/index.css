@@ -1,0 +1,53 @@
+
+body{
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: rgb(0, 0, 0) !important;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: rgba(199, 199, 235, 0.336)  !important;
+}
+
+nav{
+    background-color: rgba(4, 4, 53, 0.281);
+}
+.nav a{
+    font-family: roboto;
+}
+.texto{
+display: flex;
+justify-content: center;
+font-family: roboto;
+}
+.texto a{
+    color: black;
+}
+#ingreso{
+justify-content: end;
+margin-top: 150px;
+margin-left: 600px;
+
+}
+#ingreso input{
+    opacity: 0.5;
+    border-radius: 20px;
+    box-shadow: 5px -5px rgb(22, 77, 139);
+}
+
+.lista a{
+    color: black;
+}
+button a{
+    text-decoration: none;
+    color: white;
+}
+ button[type="submit"]{
+    background-color: black;
+    color: white;
+    padding: 10px ;
+    font-family: 20px;
+    font-weight: 600;
+    border-radius: 20px;
+    margin-left: 300px;
+}

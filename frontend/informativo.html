@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HidroTec - Guía de Cultivos en Suelo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/frontend/informativo.css">
+</head>
+<body class="bg-gray-50 font-sans">
+     <!-- Navigation Bar -->
+    <nav class="bg-zinc-200 text-black shadow-lg fixed top-0 w-full z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <img src="/frontend/img/HIDROTEC (1).png" alt="" height="50px" width="55px">
+                <span class="text-xl font-bold">HidroTec</span>
+            </div>
+            
+            <div class="hidden md:flex space-x-6">
+                <a href="/frontend/docente/principal.html" class="nav-item">Dashboard</a>
+                <a href="guia.html" class="nav-item">Guía cultivo</a>
+                <a href="/frontend/docente/estudiantes.html" class="nav-item">Estudiantes</a>
+                <a href="configuracion.html" class="nav-item">Informes</a>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <!-- Información del Usuario -->
+                <div class="flex items-center space-x-2">
+                    <span class="hidden md:inline font-medium" id="user-name">John Doe</span>
+                </div>
+                <!-- Notificaciones -->
+                <div class="relative">
+                    <i class="fas fa-bell text-xl cursor-pointer hover:text-blue-600 transition-colors"></i>
+                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">3</span>
+                </div>
+                
+                <!-- Configuración/Editar Perfil -->
+                <div class="relative">
+                    <i class="fas fa-cog text-xl cursor-pointer hover:text-blue-600 transition-colors hover:rotate-45 duration-200" 
+                       id="config-btn" 
+                       title="Configurar Perfil"></i>
+                </div>
+                
+                <!-- Botón Cerrar Sesión -->
+                <button id="logout-btn" 
+                        class="bg-blue-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg flex items-center space-x-1 transition-colors duration-200"
+                        title="Cerrar Sesión">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="hidden md:inline">Cerrar Sesión</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-green-800 text-white shadow-lg z-50">
+        <div class="flex justify-around py-3">
+            <a href="#ph-section" class="flex flex-col items-center text-white">
+                <i class="fas fa-balance-scale text-xl"></i>
+                <span class="text-xs mt-1">pH</span>
+            </a>
+            <a href="#tds-section" class="flex flex-col items-center">
+                <i class="fas fa-tint text-xl"></i>
+                <span class="text-xs mt-1">TDS</span>
+            </a>
+            <a href="#temp-section" class="flex flex-col items-center">
+                <i class="fas fa-thermometer-half text-xl"></i>
+                <span class="text-xs mt-1">Temperatura</span>
+            </a>
+            <a href="#tips-section" class="flex flex-col items-center">
+                <i class="fas fa-lightbulb text-xl"></i>
+                <span class="text-xs mt-1">Consejos</span>
+            </a>
+        </div>
+    </div>
+
+    <main class="container mx-auto px-4 pt-24 pb-20 md:pb-10">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-seedling text-green-600 mr-3"></i>
+                Guía Completa para Cultivos en Suelo
+            </h1>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                Domina los fundamentos del cultivo en suelo. Aprende a manejar pH, TDS, temperatura y más para obtener los mejores resultados en tus cultivos.
+            </p>
+        </div>
+
+        <!-- Quick Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-gradient-to-r from-green-400 to-green-600 text-white rounded-xl p-6 shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold">pH Óptimo</h3>
+                        <p class="text-2xl font-bold">5.5 - 7.0</p>
+                    </div>
+                    <i class="fas fa-balance-scale text-3xl opacity-80"></i>
+                </div>
+            </div>
+            
+            <div class="bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-xl p-6 shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold">TDS Ideal</h3>
+                        <p class="text-2xl font-bold">< 500 ppm</p>
+                    </div>
+                    <i class="fas fa-tint text-3xl opacity-80"></i>
+                </div>
+            </div>
+            
+            <div class="bg-gradient-to-r from-orange-400 to-orange-600 text-white rounded-xl p-6 shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold">Temperatura</h3>
+                        <p class="text-2xl font-bold">18 - 25°C</p>
+                    </div>
+                    <i class="fas fa-thermometer-half text-3xl opacity-80"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Sections -->
+        <div class="space-y-8">
+            <!-- Introduction -->
+            <section class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="bg-green-600 text-white px-6 py-4">
+                    <h2 class="text-xl font-bold">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Introducción al Cultivo en Suelo
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-700 mb-4 bg-green-50 border-l-4 border-green-500 p-4 rounded text-lg leading-relaxed">
+                        El éxito de un cultivo en tierra depende de mantener un equilibrio adecuado en pH del suelo, TDS (sales disueltas en el agua de riego), temperatura y calidad del agua. Todos estos factores influyen directamente en la absorción de nutrientes, salud radicular y rendimiento del cultivo.
+                    </p>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-800 mb-2">📚 En esta guía aprenderás:</h3>
+                        <ul class="list-disc pl-6 text-gray-700 space-y-1">
+                            <li>Manejo correcto del pH del suelo y agua</li>
+                            <li>Control de sales (TDS) en el agua de riego</li>
+                            <li>Gestión de temperatura para un crecimiento óptimo</li>
+                            <li>Consejos prácticos para mejorar tus cultivos</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- pH del Suelo -->
+            <section id="ph-section" class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="bg-green-600 text-white px-6 py-4">
+                    <h2 class="text-xl font-bold">
+                        <i class="fas fa-balance-scale mr-2"></i>
+                        pH del Suelo y del Agua
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-700 mb-4">
+                        El pH indica si el suelo o el agua es ácido (&lt;7), neutro (7) o alcalino (&gt;7). Las plantas solo absorben bien los nutrientes en un rango óptimo.
+                    </p>
+                    
+                    <div class="bg-green-50 border border-green-100 rounded-lg p-4 mb-6">
+                        <h4 class="font-medium text-green-800 mb-3">🎯 Rangos recomendados:</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <ul class="list-disc pl-5 text-gray-700 space-y-2">
+                                <li><span class="font-medium">Suelos agrícolas en general:</span> 5.5 - 7.0</li>
+                                <li><span class="font-medium">Hortalizas de hoja:</span> 6.0 - 6.5</li>
+                            </ul>
+                            <ul class="list-disc pl-5 text-gray-700 space-y-2">
+                                <li><span class="font-medium">Frutales y leguminosas:</span> 6.0 - 7.0</li>
+                                <li><span class="font-medium">Cereales y gramíneas:</span> 5.5 - 6.5</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-red-50 border border-red-100 rounded-lg p-5">
+                            <h5 class="font-medium text-red-700 mb-3 text-lg">
+                                <i class="fas fa-arrow-down mr-2"></i>pH bajo (suelo ácido, &lt;5.5)
+                            </h5>
+                            <div class="mb-4">
+                                <p class="text-sm font-medium text-red-600 mb-2">⚠️ Consecuencias:</p>
+                                <ul class="list-disc pl-5 text-gray-700 text-sm space-y-1">
+                                    <li>Toxicidad por aluminio y manganeso</li>
+                                    <li>Deficiencia de calcio, magnesio y fósforo</li>
+                                    <li>Daño en raíces y menor actividad microbiana benéfica</li>
+                                </ul>
+                            </div>
+                            <div class="bg-green-100 border border-green-200 rounded p-3">
+                                <p class="text-sm font-medium text-green-700 mb-2">
+                                    <i class="fas fa-tools mr-1"></i>💡 Soluciones:
+                                </p>
+                                <ul class="list-disc pl-5 text-gray-700 text-sm space-y-1">
+                                    <li>Aplicar enmiendas calcáreas (cal agrícola, dolomita)</li>
+                                    <li>Incorporar compost maduro para equilibrar el suelo</li>
+                                    <li>Regar con agua de pH más neutro</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="bg-orange-50 border border-orange-100 rounded-lg p-5">
+                            <h5 class="font-medium text-orange-700 mb-3 text-lg">
+                                <i class="fas fa-arrow-up mr-2"></i>pH alto (suelo alcalino, &gt;7.5)
+                            </h5>
+                            <div class="mb-4">
+                                <p class="text-sm font-medium text-orange-600 mb-2">⚠️ Consecuencias:</p>
+                                <ul class="list-disc pl-5 text-gray-700 text-sm space-y-1">
+                                    <li>Deficiencia de hierro, zinc y manganeso → hojas amarillas (clorosis)</li>
+                                    <li>Nutrientes como fósforo se vuelven insolubles</li>
+                                    <li>Crecimiento lento y menor producción</li>
+                                </ul>
+                            </div>
+                            <div class="bg-green-100 border border-green-200 rounded p-3">
+                                <p class="text-sm font-medium text-green-700 mb-2">
+                                    <i class="fas fa-tools mr-1"></i>💡 Soluciones:
+                                </p>
+                                <ul class="list-disc pl-5 text-gray-700 text-sm space-y-1">
+                                    <li>Aplicar azufre elemental o sulfato de hierro para acidificar</li>
+                                    <li>Usar materia orgánica (estiércol bien compostado o turba ácida)</li>
+                                    <li>En riego, acidificar el agua con ácido cítrico o fosfórico</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TDS en Suelo -->
+            <section id="tds-section" class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="bg-blue-600 text-white px-6 py-4">
+                    <h2 class="text-xl font-bold">
+                        <i class="fas fa-tint mr-2"></i>
+                        TDS (Sales en el Agua de Riego)
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-700 mb-4">
+                        El TDS mide los sólidos disueltos totales en el agua, normalmente expresados en ppm. Un exceso de sales afecta directamente al suelo y a las raíces.
+                    </p>
+
+                    <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-6">
+                        <h4 class="font-medium text-blue-800 mb-3">📊 Rangos recomendados en agua de riego:</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                            <div class="bg-green-100 rounded-lg p-4 border-2 border-green-300">
+                                <div class="text-green-800 font-bold text-2xl">&lt; 500 ppm</div>
+                                <div class="text-green-600 text-sm font-medium">💧 Agua óptima</div>
+                            </div>
+                            <div class="bg-yellow-100 rounded-lg p-4 border-2 border-yellow-300">
+                                <div class="text-yellow-800 font-bold text-2xl">500-1000 ppm</div>
+                                <div class="text-yellow-600 text-sm font-medium">⚡ Agua aceptable</div>
+                            </div>
+                            <div class="bg-red-100 rounded-lg p-4 border-2 border-red-300">
+                                <div class="text-red-800 font-bold text-2xl">&gt; 1000 ppm</div>
+                                <div class="text-red-600 text-sm font-medium">⚠️ Agua problemática</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-yellow-50 border border-yellow-100 rounded-lg p-5">
+                            <h5 class="font-medium text-yellow-700 mb-3 text-lg">TDS bajo (&lt;200 ppm)</h5>
+                            <p class="text-sm text-gray-700 mb-3">Agua demasiado "blanda", con poca mineralización. Carencia de calcio y magnesio → tallos débiles.</p>
+                            <div class="bg-green-100 rounded p-3">
+                                <p class="text-sm font-medium text-green-700 mb-2">💡 Soluciones:</p>
+                                <ul class="list-disc pl-5 text-gray-700 text-sm space-y-1">
+                                    <li>Complementar con fertilizantes ricos en Ca y Mg</li>
+                                    <li>Usar correctores foliares de micronutrientes</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="bg-red-50 border border-red-100 rounded-lg p-5">
+                            <h5 class="font-medium text-red-700 mb-3 text-lg">TDS alto (&gt;1000 ppm)</h5>
+                            <p class="text-sm text-gray-700 mb-3">Acumulación de sales en el suelo (salinización). Dificultad de absorción de agua por las raíces (estrés osmótico). Quemaduras en bordes de hojas.</p>
+                            <div class="bg-green-100 rounded p-3">
+                                <p class="text-sm font-medium text-green-700 mb-2">💡 Soluciones:</p>
+                                <ul class="list-disc pl-5 text-gray-700 text-sm space-y-1">
+                                    <li>Usar agua de mejor calidad (ósmosis inversa o mezcla con agua de lluvia)</li>
+                                    <li>Realizar lavados de suelo (riego abundante para lixiviar sales)</li>
+                                    <li>Mejorar el drenaje para evitar acumulación</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Temperatura -->
+            <section id="temp-section" class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="bg-orange-600 text-white px-6 py-4">
+                    <h2 class="text-xl font-bold">
+                        <i class="fas fa-thermometer-half mr-2"></i>
+                        Temperatura del Suelo y Agua
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-700 mb-4">
+                        La temperatura afecta tanto al suelo como al agua de riego, y define la actividad radicular y microbiana.
+                    </p>
+
+                    <div class="bg-orange-50 border border-orange-100 rounded-lg p-4 mb-6 text-center">
+                        <h4 class="font-medium text-orange-800 mb-3">🌡️ Rango ideal para la mayoría de cultivos:</h4>
+                        <div class="flex justify-center space-x-12">
+                            <div class="bg-green-100 rounded-lg p-4">
+                                <div class="text-3xl font-bold text-green-700">18-25°C</div>
+                                <div class="text-green-600 font-medium">🌱 Suelo</div>
+                            </div>
+                            <div class="bg-blue-100 rounded-lg p-4">
+                                <div class="text-3xl font-bold text-blue-700">18-22°C</div>
+                                <div class="text-blue-600 font-medium">💧 Agua de riego</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-blue-50 border border-blue-100 rounded-lg p-5">
+                            <h5 class="font-medium text-blue-700 mb-3 text-lg">
+                                <i class="fas fa-snowflake mr-2"></i>Temperaturas bajas (&lt;15°C en suelo)
+                            </h5>
+                            <div class="mb-4">
+                                <p class="text-sm font-medium text-blue-600 mb-2">❄️ Consecuencias:</p>
+                                <ul class="list-disc pl-5 text-gray-700 text-sm space-y-1">
+                                    <li>Menor germinación de semillas</li>
+                                    <li>Lentitud en la absorción de nutrientes</li>
+                                    <li>Raíces inactivas o atrofiadas</li>
+                                </ul>
+                            </div>
+                            <div class="bg-green-100 rounded p-3">
+                                <p class="text-sm font-medium text-green-700 mb-2">💡 Soluciones:</p>
+                                <ul class="list-disc pl-5 text-gray-700 text-sm space-y-1">
+                                    <li>Usar acolchados plásticos o paja para retener calor</li>
+                                    <li>Sembrar en épocas adecuadas al clima</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="bg-red-50 border border-red-100 rounded-lg p-5">
+                            <h5 class="font-medium text-red-700 mb-3 text-lg">
+                                <i class="fas fa-sun mr-2"></i>Temperaturas altas (&gt;28°C en suelo)
+                            </h5>
+                            <div class="mb-4">
+                                <p class="text-sm font-medium text-red-600 mb-2">🔥 Consecuencias:</p>
+                                <ul class="list-disc pl-5 text-gray-700 text-sm space-y-1">
+                                    <li>Aumento de evaporación → sequedad y estrés hídrico</li>
+                                    <li>Mayor proliferación de patógenos y plagas</li>
+                                    <li>Raíces poco profundas y debilitadas</li>
+                                </ul>
+                            </div>
+                            <div class="bg-green-100 rounded p-3">
+                                <p class="text-sm font-medium text-green-700 mb-2">💡 Soluciones:</p>
+                                <ul class="list-disc pl-5 text-gray-700 text-sm space-y-1">
+                                    <li>Aplicar riegos frecuentes pero controlados</li>
+                                    <li>Usar mulch (acolchado orgánico) para proteger el suelo</li>
+                                    <li>Mejorar la sombra o alternar con cultivos de cobertura</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Consejos Generales -->
+            <section id="tips-section" class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="bg-purple-600 text-white px-6 py-4">
+                    <h2 class="text-xl font-bold">
+                        <i class="fas fa-lightbulb mr-2"></i>
+                        Consejos Generales para Cultivos en Suelo
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-blue-50 border border-blue-100 rounded-lg p-5 hover:shadow-lg transition-shadow">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-microscope text-3xl text-blue-600 mb-2"></i>
+                                <h4 class="font-medium text-blue-800">Análisis de Suelo</h4>
+                            </div>
+                            <p class="text-gray-700 text-sm text-center">Realizar análisis cada 1-2 años para conocer pH y nutrientes disponibles.</p>
+                        </div>
+                        
+                        <div class="bg-green-50 border border-green-100 rounded-lg p-5 hover:shadow-lg transition-shadow">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-sync-alt text-3xl text-green-600 mb-2"></i>
+                                <h4 class="font-medium text-green-800">Rotación de Cultivos</h4>
+                            </div>
+                            <p class="text-gray-700 text-sm text-center">Evita el agotamiento del suelo alternando diferentes tipos de plantas.</p>
+                        </div>
+                        
+                        <div class="bg-amber-50 border border-amber-100 rounded-lg p-5 hover:shadow-lg transition-shadow">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-leaf text-3xl text-amber-600 mb-2"></i>
+                                <h4 class="font-medium text-amber-800">Materia Orgánica</h4>
+                            </div>
+                            <p class="text-gray-700 text-sm text-center">Compost y estiércol bien descompuesto mantienen fertilidad y estructura.</p>
+                        </div>
+                        
+                        <div class="bg-purple-50 border border-purple-100 rounded-lg p-5 hover:shadow-lg transition-shadow">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-eye text-3xl text-purple-600 mb-2"></i>
+                                <h4 class="font-medium text-purple-800">Monitoreo del Riego</h4>
+                            </div>
+                            <p class="text-gray-700 text-sm text-center">No solo cantidad, sino calidad del agua (pH y TDS).</p>
+                        </div>
+                        
+                        <div class="bg-indigo-50 border border-indigo-100 rounded-lg p-5 hover:shadow-lg transition-shadow">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-tint text-3xl text-indigo-600 mb-2"></i>
+                                <h4 class="font-medium text-indigo-800">Buen Drenaje</h4>
+                            </div>
+                            <p class="text-gray-700 text-sm text-center">Evita encharcamientos que dañan las raíces de las plantas.</p>
+                        </div>
+                        
+                        <div class="bg-pink-50 border border-pink-100 rounded-lg p-5 hover:shadow-lg transition-shadow">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-shield-alt text-3xl text-pink-600 mb-2"></i>
+                                <h4 class="font-medium text-pink-800">Prevención</h4>
+                            </div>
+                            <p class="text-gray-700 text-sm text-center">Monitoreo constante previene problemas mayores en el cultivo.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Summary Card -->
+            <section class="bg-gradient-to-r from-green-500 to-green-700 text-white rounded-xl shadow-lg overflow-hidden">
+                <div class="p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-center">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        Resumen de Buenas Prácticas
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="font-semibold mb-3">✅ Parámetros Óptimos:</h3>
+                            <ul class="space-y-2 text-green-100">
+                                <li>• pH del suelo: 5.5 - 7.0</li>
+                                <li>• TDS agua de riego: &lt; 500 ppm</li>
+                                <li>• Temperatura suelo: 18 - 25°C</li>
+                                <li>• Temperatura agua: 18 - 22°C</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold mb-3">🛠️ Acciones Clave:</h3>
+                            <ul class="space-y-2 text-green-100">
+                                <li>• Análisis periódico del suelo</li>
+                                <li>• Monitoreo constante de pH y TDS</li>
+                                <li>• Uso de materia orgánica</li>
+                                <li>• Rotación de cultivos</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
+            <div class="bg-green-600 text-white px-6 py-4 rounded-t-xl flex justify-between items-center">
+                <h3 class="text-xl font-bold">Iniciar Sesión</h3>
+                <button id="close-login" class="text-white hover:text-green-100">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-1" for="login-email">Correo Electrónico</label>
+                    <input type="email" id="login-email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-medium mb-1" for="login-password">Contraseña</label>
+                    <input type="password" id="login-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="remember-me" class="h-4 w-4 text-green-500 focus:ring-green-400 border-gray-300 rounded">
+                        <label for="remember-me" class="ml-2 block text-sm text-gray-700">Recordarme</label>
+                    </div>
+                    <a href="#" class="text-sm text-green-600 hover:text-green-800">¿Olvidaste tu contraseña?</a>
+                </div>
+                <button id="login-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 mb-4">
+                    Iniciar Sesión
+                </button>
+                <div class="text-center text-sm text-gray-600">
+                    ¿No tienes una cuenta? <a href="#" class="text-green-600 hover:text-green-800">Regístrate</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Smooth scrolling for mobile navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Login modal functionality
+        document.getElementById('user-menu').addEventListener('click', function() {
+            document.getElementById('login-modal').classList.remove('hidden');
+        });
+        
+        document.getElementById('close-login').addEventListener('click', function() {
+            document.getElementById('login-modal').classList.add('hidden');
+        });
+        
+        document.getElementById('login-btn').addEventListener('click', function() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (email && password) {
+                alert(`Inicio de sesión exitoso como ${email}`);
+                document.getElementById('login-modal').classList.add('hidden');
+            } else {
+                alert('Por favor ingresa tu correo electrónico y contraseña');
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('login-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.add('hidden');
+            }
+        });
+
+        // Add animation to cards on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fade-in-up');
+                }
+            });
+        });
+
+        document.querySelectorAll('section').forEach((section) => {
+            observer.observe(section);
+        });
+
+        // Función para cerrar sesión
+function logout() {
+    if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('userType');
+        alert('Sesión cerrada correctamente');
+        window.location.href = '/frontend/index.html';
+    }
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Botón de logout
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
+    }
+    
+    // Botón de configuración
+    const configBtn = document.getElementById('config-btn');
+    const profileModal = document.getElementById('profile-modal');
+    const closeModal = document.getElementById('close-modal');
+    const cancelEdit = document.getElementById('cancel-edit');
+    
+    if (configBtn && profileModal) {
+        configBtn.addEventListener('click', function() {
+            profileModal.classList.remove('hidden');
+        });
+    }
+    
+    // Cerrar modal
+    if (closeModal) {
+        closeModal.addEventListener('click', function() {
+            profileModal.classList.add('hidden');
+        });
+    }
+    
+    if (cancelEdit) {
+        cancelEdit.addEventListener('click', function() {
+            profileModal.classList.add('hidden');
+        });
+    }
+    
+    // Cerrar modal al hacer click fuera
+    if (profileModal) {
+        profileModal.addEventListener('click', function(e) {
+            if (e.target === profileModal) {
+                profileModal.classList.add('hidden');
+            }
+        });
+    }
+});
+    </script>
+
+    <style>
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+    </style>
+</body>
+</html>
